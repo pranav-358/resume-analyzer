@@ -1,4 +1,4 @@
-# app.py - AI Resume Matcher Pro (Ultra User-Friendly + Responsive)
+# app.py - AI Resume Matcher Pro (FIXED UI + Visible Colors)
 import streamlit as st
 import pandas as pd
 import numpy as np
@@ -32,10 +32,10 @@ except Exception:
     openai = None
 
 # ----------------------------
-# Page config
+# Page config - FIXED FOR VISIBILITY
 # ----------------------------
 st.set_page_config(
-    page_title="AI Resume Matcher Pro", 
+    page_title="ResumeMatch AI - Smart Resume Analysis", 
     page_icon="💼", 
     layout="wide",
     initial_sidebar_state="collapsed"
@@ -64,337 +64,294 @@ lottie_tech = load_lottie_url_safe("https://assets1.lottiefiles.com/packages/lf2
 lottie_success = load_lottie_url_safe("https://assets1.lottiefiles.com/packages/lf20_x17ybolp.json")
 
 # ----------------------------
-# Enhanced CSS - Ultra Responsive + User Friendly
+# FIXED CSS - LIGHT COLORS + PROPER VISIBILITY
 # ----------------------------
 st.markdown(
     """
 <style>
-/* ===== ENHANCED RESPONSIVE DESIGN ===== */
-
-/* Remove extra padding and set responsive max-width */
-.block-container {
-  padding-top: 1rem !important;
-  padding-bottom: 1rem !important;
-  padding-left: 1rem !important;
-  padding-right: 1rem !important;
-  max-width: 1400px !important;
+/* ===== FIX STREAMLIT DEFAULT SPACING ===== */
+.main .block-container {
+    padding-top: 2rem !important;
+    padding-bottom: 2rem !important;
+    padding-left: 2rem !important;
+    padding-right: 2rem !important;
+    max-width: 1400px !important;
 }
 
-/* Main app background */
+/* ===== CLEAN WHITE BACKGROUND ===== */
 .stApp {
-  background: linear-gradient(160deg, #f8fafc 0%, #f1f5f9 100%) !important;
-  font-family: 'Inter', 'Segoe UI', system-ui, sans-serif !important;
+    background: linear-gradient(135deg, #ffffff 0%, #f8fafc 100%) !important;
+    font-family: 'Inter', 'Segoe UI', system-ui, sans-serif !important;
 }
 
-/* ===== IMPROVED NAVIGATION ===== */
-.top-nav {
-  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%) !important;
-  padding: 1.2rem 2rem !important;
-  border-radius: 16px !important;
-  box-shadow: 0 8px 32px rgba(102, 126, 234, 0.15) !important;
-  margin-bottom: 1.5rem !important;
-  display: flex !important;
-  justify-content: space-between !important;
-  align-items: center !important;
-  gap: 1rem !important;
-  flex-wrap: wrap !important;
-  color: white !important;
+/* ===== FIXED HEADER - LIGHT & VISIBLE ===== */
+.app-header {
+    background: linear-gradient(135deg, #4f46e5 0%, #7c3aed 100%) !important;
+    padding: 2rem 2.5rem !important;
+    border-radius: 20px !important;
+    box-shadow: 0 10px 40px rgba(79, 70, 229, 0.15) !important;
+    margin-bottom: 2rem !important;
+    text-align: center !important;
+    border: 1px solid #e2e8f0 !important;
 }
 
-.app-title {
-  font-size: 1.8rem !important;
-  font-weight: 800 !important;
-  color: white !important;
-  margin: 0 !important;
-  background: linear-gradient(45deg, #FFD700, #FF6B6B, #4ECDC4) !important;
-  -webkit-background-clip: text !important;
-  -webkit-text-fill-color: transparent !important;
+.app-main-title {
+    font-size: 2.5rem !important;
+    font-weight: 800 !important;
+    color: white !important;
+    margin: 0 !important;
+    text-shadow: 0 2px 4px rgba(0, 0, 0, 0.1) !important;
 }
 
-.app-sub {
-  color: rgba(255, 255, 255, 0.9) !important;
-  font-size: 1rem !important;
-  font-weight: 400 !important;
-  margin: 0.3rem 0 0 0 !important;
+.app-subtitle {
+    color: rgba(255, 255, 255, 0.9) !important;
+    font-size: 1.2rem !important;
+    font-weight: 400 !important;
+    margin: 0.5rem 0 0 0 !important;
 }
 
-/* ===== ENHANCED CARDS ===== */
-.clean-card, .glass-card {
-  background: rgba(255, 255, 255, 0.95) !important;
-  backdrop-filter: blur(20px) !important;
-  padding: 1.8rem !important;
-  border-radius: 16px !important;
-  border: 1px solid rgba(255, 255, 255, 0.3) !important;
-  box-shadow: 
-    0 4px 20px rgba(0, 0, 0, 0.08),
-    0 2px 8px rgba(0, 0, 0, 0.04) !important;
-  margin-bottom: 1.2rem !important;
-  transition: all 0.3s ease !important;
+/* ===== CLEAN WHITE CARDS ===== */
+.clean-card {
+    background: white !important;
+    padding: 2rem !important;
+    border-radius: 16px !important;
+    border: 1px solid #e2e8f0 !important;
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08) !important;
+    margin-bottom: 1.5rem !important;
+    transition: all 0.3s ease !important;
 }
 
-.clean-card:hover, .glass-card:hover {
-  box-shadow: 
-    0 8px 32px rgba(0, 0, 0, 0.12),
-    0 4px 16px rgba(0, 0, 0, 0.06) !important;
-  transform: translateY(-2px) !important;
+.clean-card:hover {
+    box-shadow: 0 8px 30px rgba(0, 0, 0, 0.12) !important;
+    transform: translateY(-2px) !important;
 }
 
-/* ===== IMPROVED BUTTONS ===== */
+/* ===== IMPROVED BUTTONS - VISIBLE COLORS ===== */
 .stButton > button {
-  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%) !important;
-  color: white !important;
-  border: none !important;
-  border-radius: 12px !important;
-  padding: 0.8rem 2rem !important;
-  font-weight: 600 !important;
-  font-size: 1rem !important;
-  transition: all 0.3s ease !important;
-  box-shadow: 0 4px 15px rgba(102, 126, 234, 0.3) !important;
-  width: 100% !important;
+    background: linear-gradient(135deg, #4f46e5 0%, #7c3aed 100%) !important;
+    color: white !important;
+    border: none !important;
+    border-radius: 12px !important;
+    padding: 0.8rem 2rem !important;
+    font-weight: 600 !important;
+    font-size: 1rem !important;
+    transition: all 0.3s ease !important;
+    box-shadow: 0 4px 15px rgba(79, 70, 229, 0.3) !important;
+    width: 100% !important;
 }
 
 .stButton > button:hover {
-  transform: translateY(-2px) !important;
-  box-shadow: 0 6px 20px rgba(102, 126, 234, 0.4) !important;
+    transform: translateY(-2px) !important;
+    box-shadow: 0 6px 20px rgba(79, 70, 229, 0.4) !important;
+    background: linear-gradient(135deg, #4338ca 0%, #6d28d9 100%) !important;
 }
 
-/* ===== ENHANCED INPUT FIELDS ===== */
+/* ===== CLEAR INPUT FIELDS ===== */
 .stTextArea textarea {
-  background: rgba(248, 250, 252, 0.8) !important;
-  border-radius: 12px !important;
-  padding: 1rem !important;
-  border: 2px solid #e2e8f0 !important;
-  font-size: 0.95rem !important;
-  line-height: 1.5 !important;
-  transition: all 0.3s ease !important;
+    background: #f8fafc !important;
+    border-radius: 12px !important;
+    padding: 1rem !important;
+    border: 2px solid #e2e8f0 !important;
+    font-size: 0.95rem !important;
+    line-height: 1.5 !important;
+    transition: all 0.3s ease !important;
+    color: #1e293b !important;
 }
 
 .stTextArea textarea:focus {
-  border-color: #667eea !important;
-  box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1) !important;
-  background: white !important;
+    border-color: #4f46e5 !important;
+    box-shadow: 0 0 0 3px rgba(79, 70, 229, 0.1) !important;
+    background: white !important;
 }
 
-/* ===== BETTER SKILL TAGS ===== */
+.stTextArea textarea::placeholder {
+    color: #64748b !important;
+}
+
+/* ===== VISIBLE SKILL TAGS ===== */
 .skill-tag {
-  display: inline-block !important;
-  margin: 0.3rem !important;
-  padding: 0.5rem 1rem !important;
-  border-radius: 20px !important;
-  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%) !important;
-  color: white !important;
-  font-weight: 600 !important;
-  font-size: 0.85rem !important;
-  box-shadow: 0 2px 8px rgba(102, 126, 234, 0.2) !important;
-  transition: all 0.2s ease !important;
+    display: inline-block !important;
+    margin: 0.3rem !important;
+    padding: 0.5rem 1rem !important;
+    border-radius: 20px !important;
+    background: linear-gradient(135deg, #4f46e5 0%, #7c3aed 100%) !important;
+    color: white !important;
+    font-weight: 600 !important;
+    font-size: 0.85rem !important;
+    box-shadow: 0 2px 8px rgba(79, 70, 229, 0.2) !important;
+    transition: all 0.2s ease !important;
 }
 
 .skill-tag:hover {
-  transform: scale(1.05) !important;
-  box-shadow: 0 4px 12px rgba(102, 126, 234, 0.3) !important;
+    transform: scale(1.05) !important;
+    box-shadow: 0 4px 12px rgba(79, 70, 229, 0.3) !important;
 }
 
-/* ===== IMPROVED PROGRESS BAR ===== */
-.stProgress > div > div > div {
-  background: linear-gradient(90deg, #667eea 0%, #764ba2 100%) !important;
-  border-radius: 10px !important;
-}
-
-/* ===== STEP INDICATOR ===== */
+/* ===== STEP INDICATOR - VISIBLE ===== */
 .step-indicator {
-  display: flex !important;
-  justify-content: space-between !important;
-  align-items: center !important;
-  margin: 1.5rem 0 !important;
-  position: relative !important;
+    display: flex !important;
+    justify-content: space-between !important;
+    align-items: center !important;
+    margin: 2rem 0 !important;
+    position: relative !important;
 }
 
 .step {
-  display: flex !important;
-  flex-direction: column !important;
-  align-items: center !important;
-  flex: 1 !important;
-  position: relative !important;
+    display: flex !important;
+    flex-direction: column !important;
+    align-items: center !important;
+    flex: 1 !important;
+    position: relative !important;
 }
 
 .step-number {
-  width: 40px !important;
-  height: 40px !important;
-  border-radius: 50% !important;
-  background: #e2e8f0 !important;
-  color: #64748b !important;
-  display: flex !important;
-  align-items: center !important;
-  justify-content: center !important;
-  font-weight: 700 !important;
-  margin-bottom: 0.5rem !important;
-  z-index: 2 !important;
-  transition: all 0.3s ease !important;
+    width: 45px !important;
+    height: 45px !important;
+    border-radius: 50% !important;
+    background: #f1f5f9 !important;
+    color: #64748b !important;
+    display: flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    font-weight: 700 !important;
+    margin-bottom: 0.5rem !important;
+    z-index: 2 !important;
+    transition: all 0.3s ease !important;
+    border: 2px solid #e2e8f0 !important;
 }
 
 .step.active .step-number {
-  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%) !important;
-  color: white !important;
-  box-shadow: 0 4px 15px rgba(102, 126, 234, 0.4) !important;
+    background: linear-gradient(135deg, #4f46e5 0%, #7c3aed 100%) !important;
+    color: white !important;
+    box-shadow: 0 4px 15px rgba(79, 70, 229, 0.4) !important;
+    border-color: #4f46e5 !important;
 }
 
 .step-line {
-  position: absolute !important;
-  top: 20px !important;
-  left: 50% !important;
-  right: -50% !important;
-  height: 3px !important;
-  background: #e2e8f0 !important;
-  z-index: 1 !important;
+    position: absolute !important;
+    top: 22px !important;
+    left: 50% !important;
+    right: -50% !important;
+    height: 3px !important;
+    background: #e2e8f0 !important;
+    z-index: 1 !important;
 }
 
-.step.active ~ .step .step-line {
-  background: #e2e8f0 !important;
+.step.active .step-line {
+    background: #4f46e5 !important;
 }
 
 .step-label {
-  font-size: 0.85rem !important;
-  color: #64748b !important;
-  font-weight: 500 !important;
-  text-align: center !important;
+    font-size: 0.9rem !important;
+    color: #64748b !important;
+    font-weight: 500 !important;
+    text-align: center !important;
 }
 
 .step.active .step-label {
-  color: #667eea !important;
-  font-weight: 600 !important;
+    color: #4f46e5 !important;
+    font-weight: 600 !important;
+}
+
+/* ===== TAB STYLING ===== */
+.stTabs [data-baseweb="tab-list"] {
+    gap: 2rem !important;
+    background-color: #f8fafc !important;
+    padding: 0.5rem !important;
+    border-radius: 12px !important;
+}
+
+.stTabs [data-baseweb="tab"] {
+    height: 50px !important;
+    background-color: #f8fafc !important;
+    border-radius: 8px !important;
+    padding: 0 1rem !important;
+    font-weight: 500 !important;
+}
+
+.stTabs [aria-selected="true"] {
+    background-color: white !important;
+    color: #4f46e5 !important;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1) !important;
+}
+
+/* ===== PROGRESS BAR ===== */
+.stProgress > div > div > div {
+    background: linear-gradient(90deg, #4f46e5 0%, #7c3aed 100%) !important;
+    border-radius: 10px !important;
 }
 
 /* ===== MOBILE RESPONSIVENESS ===== */
 @media (max-width: 768px) {
-  .block-container {
-    padding: 0.5rem !important;
-  }
-  
-  .top-nav {
+    .main .block-container {
+        padding: 1rem !important;
+    }
+    
+    .app-header {
+        padding: 1.5rem 1rem !important;
+    }
+    
+    .app-main-title {
+        font-size: 1.8rem !important;
+    }
+    
+    .app-subtitle {
+        font-size: 1rem !important;
+    }
+    
+    .clean-card {
+        padding: 1.5rem !important;
+    }
+    
+    .step-indicator {
+        flex-wrap: wrap !important;
+        gap: 1rem !important;
+    }
+    
+    .step {
+        flex: 0 0 calc(50% - 1rem) !important;
+        margin-bottom: 1rem !important;
+    }
+    
+    .step-line {
+        display: none !important;
+    }
+}
+
+/* ===== HIDE STREAMLIT DEFAULT ELEMENTS ===== */
+#MainMenu {visibility: hidden;}
+footer {visibility: hidden;}
+header {visibility: hidden;}
+
+/* ===== BETTER METRICS ===== */
+[data-testid="metric-container"] {
+    background: white !important;
+    border: 1px solid #e2e8f0 !important;
+    border-radius: 12px !important;
     padding: 1rem !important;
-    text-align: center !important;
-    flex-direction: column !important;
-  }
-  
-  .app-title {
-    font-size: 1.4rem !important;
-  }
-  
-  .app-sub {
-    font-size: 0.9rem !important;
-  }
-  
-  .clean-card, .glass-card {
-    padding: 1.2rem !important;
-    margin-bottom: 1rem !important;
-  }
-  
-  .step-indicator {
-    flex-wrap: wrap !important;
-    gap: 0.5rem !important;
-  }
-  
-  .step {
-    flex: 0 0 calc(33.333% - 1rem) !important;
-    margin-bottom: 1rem !important;
-  }
-  
-  .step-line {
-    display: none !important;
-  }
-  
-  .stButton > button {
-    padding: 0.7rem 1rem !important;
-    font-size: 0.9rem !important;
-  }
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05) !important;
 }
 
-@media (max-width: 480px) {
-  .step {
-    flex: 0 0 calc(50% - 1rem) !important;
-  }
-  
-  .skill-tag {
-    font-size: 0.8rem !important;
-    padding: 0.4rem 0.8rem !important;
-  }
+/* ===== SUCCESS/ERROR/WARNING MESSAGES ===== */
+.stSuccess {
+    background: linear-gradient(135deg, #10b981 0%, #059669 100%) !important;
+    color: white !important;
+    border-radius: 12px !important;
+    border: none !important;
 }
 
-/* ===== IMPROVED SIDEBAR ===== */
-.css-1d391kg, .css-1lcbmhc {
-  background: rgba(255, 255, 255, 0.95) !important;
-  backdrop-filter: blur(20px) !important;
+.stError {
+    background: linear-gradient(135deg, #ef4444 0%, #dc2626 100%) !important;
+    color: white !important;
+    border-radius: 12px !important;
+    border: none !important;
 }
 
-/* ===== BETTER SPACING ===== */
-.main-section {
-  margin-bottom: 2rem !important;
-}
-
-.section-title {
-  font-size: 1.4rem !important;
-  font-weight: 700 !important;
-  color: #1e293b !important;
-  margin-bottom: 1rem !important;
-  display: flex !important;
-  align-items: center !important;
-  gap: 0.5rem !important;
-}
-
-/* ===== TOOLTIP STYLES ===== */
-.tooltip {
-  position: relative !important;
-  display: inline-block !important;
-  cursor: help !important;
-}
-
-.tooltip .tooltiptext {
-  visibility: hidden !important;
-  width: 200px !important;
-  background: #1e293b !important;
-  color: white !important;
-  text-align: center !important;
-  border-radius: 8px !important;
-  padding: 0.5rem !important;
-  position: absolute !important;
-  z-index: 1000 !important;
-  bottom: 125% !important;
-  left: 50% !important;
-  transform: translateX(-50%) !important;
-  opacity: 0 !important;
-  transition: opacity 0.3s !important;
-  font-size: 0.8rem !important;
-  font-weight: 400 !important;
-}
-
-.tooltip:hover .tooltiptext {
-  visibility: visible !important;
-  opacity: 1 !important;
-}
-
-/* ===== SUCCESS/ERROR STATES ===== */
-.success-message {
-  background: linear-gradient(135deg, #10b981 0%, #059669 100%) !important;
-  color: white !important;
-  padding: 1rem !important;
-  border-radius: 12px !important;
-  margin: 1rem 0 !important;
-}
-
-.error-message {
-  background: linear-gradient(135deg, #ef4444 0%, #dc2626 100%) !important;
-  color: white !important;
-  padding: 1rem !important;
-  border-radius: 12px !important;
-  margin: 1rem 0 !important;
-}
-
-.warning-message {
-  background: linear-gradient(135deg, #f59e0b 0%, #d97706 100%) !important;
-  color: white !important;
-  padding: 1rem !important;
-  border-radius: 12px !important;
-  margin: 1rem 0 !important;
+.stWarning {
+    background: linear-gradient(135deg, #f59e0b 0%, #d97706 100%) !important;
+    color: white !important;
+    border-radius: 12px !important;
+    border: none !important;
 }
 </style>
 """,
@@ -402,7 +359,7 @@ st.markdown(
 )
 
 # ----------------------------
-# Skill extraction (keep your existing function)
+# REST OF YOUR FUNCTIONS (UNCHANGED)
 # ----------------------------
 def extract_skills_advanced(text):
     tech_skills = {
@@ -427,9 +384,6 @@ def extract_skills_advanced(text):
             found_soft_skills.append(skill.title())
     return found_skills, found_soft_skills
 
-# ----------------------------
-# Core matching calculation (keep your existing function)
-# ----------------------------
 def calculate_ai_match(resume_text, job_desc):
     if not (resume_text or "").strip() or not (job_desc or "").strip():
         return 0, {}, [], {}
@@ -452,9 +406,6 @@ def calculate_ai_match(resume_text, job_desc):
     final_score = (similarity * 40 + tech_match * 45 + soft_match * 15)
     return min(round(final_score * 100, 2), 100), resume_tech, resume_soft, job_tech, job_soft
 
-# ----------------------------
-# Job description analyzer (keep your existing function)
-# ----------------------------
 def analyze_job_description(jd_text):
     jd = jd_text or ""
     lines = [l.strip() for l in jd.splitlines() if l.strip()]
@@ -479,9 +430,6 @@ def analyze_job_description(jd_text):
         "job_soft": job_soft
     }
 
-# ----------------------------
-# PDF text extraction (keep your existing function)
-# ----------------------------
 def extract_text_from_pdf(file_bytes):
     if PdfReader is None:
         return None, "PyPDF2 not installed. Install with `pip install PyPDF2`"
@@ -494,9 +442,6 @@ def extract_text_from_pdf(file_bytes):
     except Exception as e:
         return None, f"Failed to extract PDF text: {e}"
 
-# ----------------------------
-# AI resume improver (keep your existing function)
-# ----------------------------
 def ai_improve_resume(resume_text, openai_api_key, target_role=None, max_tokens=700):
     if not openai:
         return None, "openai package not installed. Install with `pip install openai`"
@@ -522,9 +467,6 @@ Provide output only in plain text with improved resume content."""
     except Exception as e:
         return None, f"OpenAI request failed: {e}"
 
-# ----------------------------
-# PDF report generator (keep your existing function)
-# ----------------------------
 def generate_report_pdf(match_score, resume_text, job_desc, strong_points, improvement_points, job_title=""):
     pdf = FPDF()
     pdf.set_auto_page_break(auto=True, margin=15)
@@ -568,45 +510,40 @@ def generate_report_pdf(match_score, resume_text, job_desc, strong_points, impro
     return out
 
 # ----------------------------
-# ENHANCED UI BUILDING
+# FIXED UI BUILDING
 # ----------------------------
 
-# Improved Top Navigation
+# FIXED HEADER - Now clearly visible
 html(f"""
-<div class="top-nav">
-  <div>
-    <div class="app-title">🚀 ResumeMatch AI</div>
-    <div class="app-sub">Smart Resume Analysis • AI-Powered Matching • Professional Reports</div>
-  </div>
-  <div style="text-align:right; color:white;">
-    <small>Be Better</small>
-  </div>
+<div class="app-header">
+    <div class="app-main-title">🚀 ResumeMatch AI</div>
+    <div class="app-subtitle">Smart Resume Analysis • AI-Powered Matching • Professional Reports</div>
 </div>
 """)
 
-# Step Indicator for Better UX
+# Step Indicator
 html("""
 <div class="step-indicator">
-  <div class="step active">
-    <div class="step-number">1</div>
-    <div class="step-line"></div>
-    <div class="step-label">Upload Resume</div>
-  </div>
-  <div class="step">
-    <div class="step-number">2</div>
-    <div class="step-line"></div>
-    <div class="step-label">Add Job Details</div>
-  </div>
-  <div class="step">
-    <div class="step-number">3</div>
-    <div class="step-line"></div>
-    <div class="step-label">Get Analysis</div>
-  </div>
-  <div class="step">
-    <div class="step-number">4</div>
-    <div class="step-line"></div>
-    <div class="step-label">Download Report</div>
-  </div>
+    <div class="step active">
+        <div class="step-number">1</div>
+        <div class="step-line"></div>
+        <div class="step-label">Upload Resume</div>
+    </div>
+    <div class="step">
+        <div class="step-number">2</div>
+        <div class="step-line"></div>
+        <div class="step-label">Add Job Details</div>
+    </div>
+    <div class="step">
+        <div class="step-number">3</div>
+        <div class="step-line"></div>
+        <div class="step-label">Get Analysis</div>
+    </div>
+    <div class="step">
+        <div class="step-number">4</div>
+        <div class="step-line"></div>
+        <div class="step-label">Download Report</div>
+    </div>
 </div>
 """)
 
@@ -651,14 +588,14 @@ if "job_desc_input" not in st.session_state:
 if "current_step" not in st.session_state:
     st.session_state["current_step"] = 1
 
-# Main Content Area
-tab1, tab2, tab3 = st.tabs(["📝 Resume Input", "💼 Job Analysis", "📊 Results"])
+# Main Content Area with Tabs
+tab1, tab2, tab3 = st.tabs(["📝 Resume Input", "💼 Job Analysis", "📊 Match Results"])
 
 with tab1:
     html('<div class="clean-card">')
-    st.subheader("📄 Your Resume")
+    st.subheader("📄 Your Resume Content")
     
-    # Improved file upload with better UX
+    # File upload section
     col1, col2 = st.columns([1, 1])
     with col1:
         upload_mode = st.radio(
@@ -669,7 +606,7 @@ with tab1:
     
     if upload_mode == "📁 Upload PDF":
         uploaded_file = st.file_uploader(
-            "Drag & drop or click to upload PDF",
+            "Upload your resume PDF",
             type=["pdf"],
             help="Supported: PDF files up to 10MB"
         )
@@ -692,9 +629,9 @@ with tab1:
                                 key="preview_area"
                             )
     
-    # Enhanced text area with character count
+    # Text area for resume
     st.session_state["resume_text"] = st.text_area(
-        "✍️ Paste or edit your resume content:",
+        "Paste or edit your resume content:",
         height=300,
         value=st.session_state["resume_text"],
         placeholder="""EXPERIENCE:
@@ -727,7 +664,7 @@ EDUCATION:
         st.subheader("🤖 AI Resume Improver")
         
         target_role = st.text_input(
-            "🎯 Target role (optional):",
+            "Target role (optional):",
             placeholder="e.g., Full Stack Developer, Data Scientist",
             help="AI will tailor improvements for this specific role"
         )
@@ -756,7 +693,7 @@ with tab2:
     st.subheader("💼 Job Description Analysis")
     
     st.session_state["job_desc_input"] = st.text_area(
-        "📋 Paste the job description:",
+        "Paste the job description:",
         height=300,
         value=st.session_state["job_desc_input"],
         placeholder="""JOB TITLE: Full Stack Developer
@@ -786,7 +723,7 @@ SOFT SKILLS:
         word_count = len(st.session_state["job_desc_input"].split())
         st.caption(f"📊 {char_count} characters, {word_count} words")
     
-    # Enhanced JD Analysis
+    # JD Analysis
     if st.button("🔍 Analyze Job Description", use_container_width=True):
         if not st.session_state["job_desc_input"]:
             st.error("Please add a job description first")
@@ -851,9 +788,6 @@ with tab3:
             with st.spinner("🔍 Analyzing your match..."):
                 time.sleep(1)
                 score, rtech, rsoft, jtech, jsoft = calculate_ai_match(resume_text, job_desc_input)
-                
-                # Update step indicator
-                st.session_state["current_step"] = 3
                 
                 # Display Results
                 st.markdown("---")
@@ -949,13 +883,13 @@ with tab3:
                         name="Your Skills", 
                         x=cats, 
                         y=resume_counts,
-                        marker_color='#4ECDC4'
+                        marker_color='#4f46e5'
                     ))
                     fig.add_trace(go.Bar(
                         name="Required Skills", 
                         x=cats, 
                         y=job_counts,
-                        marker_color='#FF6B6B'
+                        marker_color='#7c3aed'
                     ))
                     fig.update_layout(
                         title="Skill Distribution Comparison",
@@ -990,9 +924,9 @@ with tab3:
 
 # Enhanced Footer
 html("""
-<div style='text-align:center; color:#64748b; margin-top:2rem; padding:1.5rem; background:rgba(255,255,255,0.8); border-radius:12px;'>
-    <div style='font-weight:600; margin-bottom:0.5rem;'>🚀 ResumeMatch AI</div>
-    <div style='font-size:0.9rem;'>AI-Powered Resume Analysis • Professional Matching • Career Optimization</div>
-    <div style='font-size:0.8rem; margin-top:0.5rem; color:#94a3b8;'>Built with ❤️ using Streamlit</div>
+<div style='text-align:center; color:#64748b; margin-top:3rem; padding:2rem; background:white; border-radius:16px; border:1px solid #e2e8f0;'>
+    <div style='font-weight:700; margin-bottom:0.5rem; font-size:1.1rem;'>🚀 ResumeMatch AI</div>
+    <div style='font-size:0.95rem;'>AI-Powered Resume Analysis • Professional Matching • Career Optimization</div>
+    <div style='font-size:0.85rem; margin-top:0.8rem; color:#94a3b8;'>Built with ❤️ using Streamlit</div>
 </div>
 """)
