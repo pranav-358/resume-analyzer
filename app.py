@@ -27,7 +27,7 @@ except Exception:
 # Page config
 # ----------------------------
 st.set_page_config(
-    page_title="ResumeMatch - AI Resume Analyzer", 
+    page_title="ResumeMatch Pro - AI Resume Analyzer", 
     page_icon="💼", 
     layout="wide",
     initial_sidebar_state="expanded"
@@ -42,33 +42,47 @@ def html(content):
 # ----------------------------
 # Session State Management
 # ----------------------------
-if "resume_text" not in st.session_state:
-    st.session_state["resume_text"] = ""
-if "job_desc_input" not in st.session_state:
-    st.session_state["job_desc_input"] = ""
-if "current_step" not in st.session_state:
-    st.session_state["current_step"] = 1
-if "analysis_complete" not in st.session_state:
-    st.session_state["analysis_complete"] = False
+def initialize_session_state():
+    if "resume_text" not in st.session_state:
+        st.session_state["resume_text"] = ""
+    if "job_desc_input" not in st.session_state:
+        st.session_state["job_desc_input"] = ""
+    if "current_step" not in st.session_state:
+        st.session_state["current_step"] = 1
+    if "analysis_complete" not in st.session_state:
+        st.session_state["analysis_complete"] = False
+    if "match_score" not in st.session_state:
+        st.session_state["match_score"] = 0
+    if "analysis_results" not in st.session_state:
+        st.session_state["analysis_results"] = None
+
+initialize_session_state()
 
 # ----------------------------
-# PROFESSIONAL CSS - HR FRIENDLY
+# PREMIUM PROFESSIONAL CSS
 # ----------------------------
 st.markdown(
     """
 <style>
-/* ===== PROFESSIONAL COLOR SCHEME ===== */
+/* ===== PREMIUM COLOR SCHEME ===== */
 :root {
     --primary: #2563eb;
     --primary-dark: #1d4ed8;
+    --primary-light: #dbeafe;
     --secondary: #64748b;
     --success: #10b981;
+    --success-light: #d1fae5;
     --warning: #f59e0b;
+    --warning-light: #fef3c7;
     --error: #ef4444;
+    --error-light: #fee2e2;
     --background: #f8fafc;
     --surface: #ffffff;
     --text: #1e293b;
     --text-light: #64748b;
+    --border: #e2e8f0;
+    --shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+    --shadow-hover: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
 }
 
 /* ===== MAIN CONTAINER ===== */
@@ -83,119 +97,194 @@ st.markdown(
 .stApp {
     background: var(--background) !important;
     font-family: 'Inter', 'Segoe UI', system-ui, sans-serif !important;
+    line-height: 1.6 !important;
 }
 
-/* ===== PROFESSIONAL HEADER ===== */
-.professional-header {
+/* ===== PREMIUM HEADER ===== */
+.premium-header {
     background: linear-gradient(135deg, var(--primary) 0%, var(--primary-dark) 100%) !important;
-    padding: 2.5rem 2rem !important;
-    border-radius: 12px !important;
+    padding: 3rem 2rem !important;
+    border-radius: 16px !important;
     margin-bottom: 2rem !important;
     text-align: center !important;
-    box-shadow: 0 4px 20px rgba(37, 99, 235, 0.15) !important;
-    border: 1px solid #e2e8f0 !important;
+    box-shadow: var(--shadow) !important;
+    border: 1px solid var(--border) !important;
+    position: relative !important;
+    overflow: hidden !important;
+}
+
+.premium-header::before {
+    content: '' !important;
+    position: absolute !important;
+    top: 0 !important;
+    left: 0 !important;
+    right: 0 !important;
+    bottom: 0 !important;
+    background: url("data:image/svg+xml,%3Csvg width='100' height='100' viewBox='0 0 100 100' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M11 18c3.866 0 7-3.134 7-7s-3.134-7-7-7-7 3.134-7 7 3.134 7 7 7zm48 25c3.866 0 7-3.134 7-7s-3.134-7-7-7-7 3.134-7 7 3.134 7 7 7zm-43-7c1.657 0 3-1.343 3-3s-1.343-3-3-3-3 1.343-3 3 1.343 3 3 3zm63 31c1.657 0 3-1.343 3-3s-1.343-3-3-3-3 1.343-3 3 1.343 3 3 3zM34 90c1.657 0 3-1.343 3-3s-1.343-3-3-3-3 1.343-3 3 1.343 3 3 3zm56-76c1.657 0 3-1.343 3-3s-1.343-3-3-3-3 1.343-3 3 1.343 3 3 3zM12 86c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm28-65c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm23-11c2.76 0 5-2.24 5-5s-2.24-5-5-5-5 2.24-5 5 2.24 5 5 5zm-6 60c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm29 22c2.76 0 5-2.24 5-5s-2.24-5-5-5-5 2.24-5 5 2.24 5 5 5zM32 63c2.76 0 5-2.24 5-5s-2.24-5-5-5-5 2.24-5 5 2.24 5 5 5zm57-13c2.76 0 5-2.24 5-5s-2.24-5-5-5-5 2.24-5 5 2.24 5 5 5zm-9-21c1.105 0 2-.895 2-2s-.895-2-2-2-2 .895-2 2 .895 2 2 2zM60 91c1.105 0 2-.895 2-2s-.895-2-2-2-2 .895-2 2 .895 2 2 2zM35 41c1.105 0 2-.895 2-2s-.895-2-2-2-2 .895-2 2 .895 2 2 2zM12 60c1.105 0 2-.895 2-2s-.895-2-2-2-2 .895-2 2 .895 2 2 2z' fill='%23ffffff' fill-opacity='0.1' fill-rule='evenodd'/%3E%3C/svg%3E") !important;
+    opacity: 0.3 !important;
 }
 
 .main-title {
-    font-size: 2.5rem !important;
-    font-weight: 700 !important;
+    font-size: 2.75rem !important;
+    font-weight: 800 !important;
     color: white !important;
     margin: 0 !important;
     letter-spacing: -0.5px !important;
+    text-shadow: 0 2px 4px rgba(0, 0, 0, 0.1) !important;
 }
 
 .sub-title {
-    color: rgba(255, 255, 255, 0.9) !important;
-    font-size: 1.1rem !important;
+    color: rgba(255, 255, 255, 0.95) !important;
+    font-size: 1.25rem !important;
     font-weight: 400 !important;
-    margin: 0.8rem 0 0 0 !important;
+    margin: 1rem 0 0 0 !important;
+    max-width: 600px !important;
+    margin-left: auto !important;
+    margin-right: auto !important;
+    line-height: 1.5 !important;
 }
 
-/* ===== PROFESSIONAL CARDS ===== */
-.pro-card {
+/* ===== PREMIUM CARDS ===== */
+.premium-card {
     background: var(--surface) !important;
     padding: 2rem !important;
-    border-radius: 12px !important;
-    border: 1px solid #e2e8f0 !important;
-    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06) !important;
+    border-radius: 16px !important;
+    border: 1px solid var(--border) !important;
+    box-shadow: var(--shadow) !important;
     margin-bottom: 1.5rem !important;
     transition: all 0.3s ease !important;
+    position: relative !important;
+    overflow: hidden !important;
 }
 
-.pro-card:hover {
-    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1) !important;
+.premium-card::before {
+    content: '' !important;
+    position: absolute !important;
+    top: 0 !important;
+    left: 0 !important;
+    width: 4px !important;
+    height: 100% !important;
+    background: linear-gradient(to bottom, var(--primary), var(--success)) !important;
+}
+
+.premium-card:hover {
+    box-shadow: var(--shadow-hover) !important;
     border-color: #cbd5e1 !important;
+    transform: translateY(-2px) !important;
 }
 
-/* ===== PROFESSIONAL BUTTONS ===== */
+/* ===== PREMIUM BUTTONS ===== */
 .stButton > button {
-    background: var(--primary) !important;
+    background: linear-gradient(135deg, var(--primary) 0%, var(--primary-dark) 100%) !important;
     color: white !important;
     border: none !important;
-    border-radius: 8px !important;
-    padding: 0.75rem 2rem !important;
+    border-radius: 10px !important;
+    padding: 0.875rem 2rem !important;
     font-weight: 600 !important;
     font-size: 1rem !important;
-    transition: all 0.2s ease !important;
+    transition: all 0.3s ease !important;
     width: 100% !important;
+    box-shadow: 0 2px 4px rgba(37, 99, 235, 0.2) !important;
+    position: relative !important;
+    overflow: hidden !important;
+}
+
+.stButton > button::before {
+    content: '' !important;
+    position: absolute !important;
+    top: 0 !important;
+    left: -100% !important;
+    width: 100% !important;
+    height: 100% !important;
+    background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.2), transparent) !important;
+    transition: left 0.5s !important;
+}
+
+.stButton > button:hover::before {
+    left: 100% !important;
 }
 
 .stButton > button:hover {
-    background: var(--primary-dark) !important;
-    transform: translateY(-1px) !important;
-    box-shadow: 0 4px 12px rgba(37, 99, 235, 0.3) !important;
+    transform: translateY(-2px) !important;
+    box-shadow: 0 4px 12px rgba(37, 99, 235, 0.4) !important;
 }
 
-/* ===== CLEAN INPUT FIELDS ===== */
-.stTextArea textarea {
+/* Secondary Button */
+.secondary-button > button {
     background: var(--surface) !important;
-    border-radius: 8px !important;
-    padding: 1rem !important;
-    border: 2px solid #e2e8f0 !important;
+    color: var(--primary) !important;
+    border: 2px solid var(--primary) !important;
+    border-radius: 10px !important;
+    padding: 0.875rem 2rem !important;
+    font-weight: 600 !important;
+    font-size: 1rem !important;
+    transition: all 0.3s ease !important;
+    width: 100% !important;
+}
+
+.secondary-button > button:hover {
+    background: var(--primary-light) !important;
+    transform: translateY(-2px) !important;
+    box-shadow: 0 4px 12px rgba(37, 99, 235, 0.15) !important;
+}
+
+/* ===== PREMIUM INPUT FIELDS ===== */
+.stTextArea textarea, .stTextInput input {
+    background: var(--surface) !important;
+    border-radius: 10px !important;
+    padding: 1rem 1.25rem !important;
+    border: 2px solid var(--border) !important;
     font-size: 0.95rem !important;
     line-height: 1.5 !important;
-    transition: all 0.2s ease !important;
+    transition: all 0.3s ease !important;
     color: var(--text) !important;
     font-family: 'Inter', sans-serif !important;
+    box-shadow: 0 1px 2px rgba(0, 0, 0, 0.05) !important;
 }
 
-.stTextArea textarea:focus {
+.stTextArea textarea:focus, .stTextInput input:focus {
     border-color: var(--primary) !important;
     box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.1) !important;
     outline: none !important;
 }
 
-.stTextArea textarea::placeholder {
+.stTextArea textarea::placeholder, .stTextInput input::placeholder {
     color: var(--text-light) !important;
 }
 
-/* ===== PROFESSIONAL SKILL TAGS ===== */
+/* ===== PREMIUM SKILL TAGS ===== */
 .skill-tag {
     display: inline-block !important;
-    margin: 0.3rem !important;
+    margin: 0.25rem !important;
     padding: 0.5rem 1rem !important;
     border-radius: 20px !important;
     background: #f1f5f9 !important;
     color: var(--text) !important;
     font-weight: 500 !important;
     font-size: 0.85rem !important;
-    border: 1px solid #e2e8f0 !important;
+    border: 1px solid var(--border) !important;
     transition: all 0.2s ease !important;
+    box-shadow: 0 1px 2px rgba(0, 0, 0, 0.05) !important;
+}
+
+.skill-tag:hover {
+    transform: translateY(-1px) !important;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1) !important;
 }
 
 .skill-tag.strong {
-    background: #d1fae5 !important;
+    background: var(--success-light) !important;
     color: #065f46 !important;
     border-color: #a7f3d0 !important;
 }
 
 .skill-tag.improve {
-    background: #fef3c7 !important;
+    background: var(--warning-light) !important;
     color: #92400e !important;
     border-color: #fcd34d !important;
 }
 
-/* ===== FUNCTIONAL STEP INDICATOR ===== */
+/* ===== PREMIUM STEP INDICATOR ===== */
 .step-indicator {
     display: flex !important;
     justify-content: space-between !important;
@@ -204,8 +293,9 @@ st.markdown(
     position: relative !important;
     background: var(--surface) !important;
     padding: 1.5rem !important;
-    border-radius: 12px !important;
-    border: 1px solid #e2e8f0 !important;
+    border-radius: 16px !important;
+    border: 1px solid var(--border) !important;
+    box-shadow: var(--shadow) !important;
 }
 
 .step {
@@ -218,19 +308,20 @@ st.markdown(
 }
 
 .step-number {
-    width: 40px !important;
-    height: 40px !important;
+    width: 48px !important;
+    height: 48px !important;
     border-radius: 50% !important;
     background: #f1f5f9 !important;
     color: var(--text-light) !important;
     display: flex !important;
     align-items: center !important;
     justify-content: center !important;
-    font-weight: 600 !important;
+    font-weight: 700 !important;
     margin-bottom: 0.5rem !important;
-    border: 2px solid #e2e8f0 !important;
+    border: 2px solid var(--border) !important;
     transition: all 0.3s ease !important;
-    font-size: 0.9rem !important;
+    font-size: 1rem !important;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05) !important;
 }
 
 .step.active .step-number {
@@ -238,23 +329,26 @@ st.markdown(
     color: white !important;
     border-color: var(--primary) !important;
     transform: scale(1.1) !important;
+    box-shadow: 0 4px 8px rgba(37, 99, 235, 0.3) !important;
 }
 
 .step.completed .step-number {
     background: var(--success) !important;
     color: white !important;
     border-color: var(--success) !important;
+    box-shadow: 0 4px 8px rgba(16, 185, 129, 0.3) !important;
 }
 
 .step-line {
     position: absolute !important;
-    top: 20px !important;
+    top: 24px !important;
     left: 50% !important;
     right: -50% !important;
-    height: 2px !important;
-    background: #e2e8f0 !important;
+    height: 3px !important;
+    background: var(--border) !important;
     z-index: 1 !important;
     transition: all 0.3s ease !important;
+    border-radius: 2px !important;
 }
 
 .step.completed .step-line {
@@ -262,7 +356,7 @@ st.markdown(
 }
 
 .step-label {
-    font-size: 0.85rem !important;
+    font-size: 0.9rem !important;
     color: var(--text-light) !important;
     font-weight: 500 !important;
     text-align: center !important;
@@ -278,19 +372,20 @@ st.markdown(
     color: var(--success) !important;
 }
 
-/* ===== PROFESSIONAL TABS ===== */
+/* ===== PREMIUM TABS ===== */
 .stTabs [data-baseweb="tab-list"] {
     gap: 0.5rem !important;
     background-color: var(--surface) !important;
     padding: 0.5rem !important;
-    border-radius: 8px !important;
-    border: 1px solid #e2e8f0 !important;
+    border-radius: 12px !important;
+    border: 1px solid var(--border) !important;
+    box-shadow: 0 1px 2px rgba(0, 0, 0, 0.05) !important;
 }
 
 .stTabs [data-baseweb="tab"] {
     height: 50px !important;
     background-color: transparent !important;
-    border-radius: 6px !important;
+    border-radius: 8px !important;
     padding: 0 1.5rem !important;
     font-weight: 500 !important;
     color: var(--text-light) !important;
@@ -299,23 +394,60 @@ st.markdown(
 }
 
 .stTabs [aria-selected="true"] {
-    background: var(--primary) !important;
+    background: linear-gradient(135deg, var(--primary) 0%, var(--primary-dark) 100%) !important;
     color: white !important;
     border-color: var(--primary) !important;
+    box-shadow: 0 2px 4px rgba(37, 99, 235, 0.2) !important;
 }
 
-/* ===== PROGRESS BAR ===== */
+/* ===== PREMIUM PROGRESS BAR ===== */
 .stProgress > div > div > div {
     background: linear-gradient(90deg, var(--primary) 0%, var(--primary-dark) 100%) !important;
-    border-radius: 4px !important;
+    border-radius: 8px !important;
+    height: 10px !important;
 }
 
-/* ===== METRICS ===== */
+/* ===== PREMIUM METRICS ===== */
 [data-testid="metric-container"] {
     background: var(--surface) !important;
-    border: 1px solid #e2e8f0 !important;
-    border-radius: 8px !important;
+    border: 1px solid var(--border) !important;
+    border-radius: 12px !important;
     padding: 1.5rem !important;
+    box-shadow: var(--shadow) !important;
+    transition: all 0.3s ease !important;
+}
+
+[data-testid="metric-container"]:hover {
+    transform: translateY(-2px) !important;
+    box-shadow: var(--shadow-hover) !important;
+}
+
+/* ===== PREMIUM SCORE DISPLAY ===== */
+.score-display {
+    text-align: center !important;
+    padding: 2rem !important;
+    border-radius: 16px !important;
+    margin: 1rem 0 !important;
+    background: linear-gradient(135deg, #f8fafc 0%, #e2e8f0 100%) !important;
+    border: 1px solid var(--border) !important;
+    box-shadow: var(--shadow) !important;
+}
+
+.score-value {
+    font-size: 3.5rem !important;
+    font-weight: 800 !important;
+    margin: 0 !important;
+    background: linear-gradient(135deg, var(--primary) 0%, var(--success) 100%) !important;
+    -webkit-background-clip: text !important;
+    -webkit-text-fill-color: transparent !important;
+    background-clip: text !important;
+}
+
+.score-label {
+    font-size: 1.25rem !important;
+    color: var(--text-light) !important;
+    margin: 0.5rem 0 0 0 !important;
+    font-weight: 500 !important;
 }
 
 /* ===== MOBILE RESPONSIVENESS ===== */
@@ -324,19 +456,19 @@ st.markdown(
         padding: 0.5rem !important;
     }
     
-    .professional-header {
+    .premium-header {
         padding: 2rem 1rem !important;
     }
     
     .main-title {
-        font-size: 2rem !important;
+        font-size: 2.25rem !important;
     }
     
     .sub-title {
-        font-size: 1rem !important;
+        font-size: 1.1rem !important;
     }
     
-    .pro-card {
+    .premium-card {
         padding: 1.5rem !important;
     }
     
@@ -354,6 +486,10 @@ st.markdown(
     .step-line {
         display: none !important;
     }
+    
+    .score-value {
+        font-size: 2.75rem !important;
+    }
 }
 
 /* ===== HIDE STREAMLIT DEFAULT ELEMENTS ===== */
@@ -361,29 +497,85 @@ st.markdown(
 footer {visibility: hidden;}
 header {visibility: hidden;}
 
-/* ===== STATUS MESSAGES ===== */
+/* ===== PREMIUM STATUS MESSAGES ===== */
 .status-success {
-    background: #d1fae5 !important;
+    background: var(--success-light) !important;
     color: #065f46 !important;
     border: 1px solid #a7f3d0 !important;
-    border-radius: 8px !important;
-    padding: 1rem !important;
+    border-radius: 10px !important;
+    padding: 1rem 1.25rem !important;
+    border-left: 4px solid var(--success) !important;
 }
 
 .status-warning {
-    background: #fef3c7 !important;
+    background: var(--warning-light) !important;
     color: #92400e !important;
     border: 1px solid #fcd34d !important;
-    border-radius: 8px !important;
-    padding: 1rem !important;
+    border-radius: 10px !important;
+    padding: 1rem 1.25rem !important;
+    border-left: 4px solid var(--warning) !important;
 }
 
 .status-error {
-    background: #fee2e2 !important;
+    background: var(--error-light) !important;
     color: #991b1b !important;
     border: 1px solid #fca5a5 !important;
-    border-radius: 8px !important;
-    padding: 1rem !important;
+    border-radius: 10px !important;
+    padding: 1rem 1.25rem !important;
+    border-left: 4px solid var(--error) !important;
+}
+
+/* ===== PREMIUM LOADING ANIMATION ===== */
+.stSpinner > div {
+    border-top-color: var(--primary) !important;
+}
+
+/* ===== CUSTOM RADIO BUTTONS ===== */
+.stRadio > div {
+    flex-direction: row !important;
+    gap: 1rem !important;
+}
+
+.stRadio > div [role="radiogroup"] {
+    display: flex !important;
+    gap: 1rem !important;
+    flex-wrap: wrap !important;
+}
+
+.stRadio > div [role="radiogroup"] label {
+    background: var(--surface) !important;
+    border: 2px solid var(--border) !important;
+    border-radius: 10px !important;
+    padding: 0.75rem 1.5rem !important;
+    transition: all 0.3s ease !important;
+    flex: 1 !important;
+    text-align: center !important;
+    min-width: 140px !important;
+}
+
+.stRadio > div [role="radiogroup"] label:hover {
+    border-color: var(--primary) !important;
+    background: var(--primary-light) !important;
+}
+
+.stRadio > div [role="radiogroup"] label[data-testid="stRadio"] {
+    background: var(--surface) !important;
+}
+
+.stRadio > div [role="radiogroup"] div:first-child {
+    flex: 1 !important;
+}
+
+.stRadio > div [role="radiogroup"] div:first-child label {
+    margin-right: 0 !important;
+}
+
+/* Selected radio button */
+.stRadio > div [role="radiogroup"] label[data-testid="stRadio"]:has(input:checked) {
+    background: linear-gradient(135deg, var(--primary) 0%, var(--primary-dark) 100%) !important;
+    color: white !important;
+    border-color: var(--primary) !important;
+    box-shadow: 0 2px 4px rgba(37, 99, 235, 0.2) !important;
 }
 </style>
 """,
@@ -532,7 +724,7 @@ RECOMMENDATIONS:
 • Tailor your resume to highlight matching skills
 • Consider relevant projects or certifications
 
-Generated by ResumeMatch 
+Generated by ResumeMatch Pro
     """
     return report
 
@@ -555,13 +747,13 @@ def update_step_progress():
         st.session_state.current_step = 1
 
 # ----------------------------
-# PROFESSIONAL UI BUILDING
+# PREMIUM UI BUILDING
 # ----------------------------
 
-# Professional Header
+# Premium Header
 html(f"""
-<div class="professional-header">
-    <div class="main-title">ResumeMatch</div>
+<div class="premium-header">
+    <div class="main-title">ResumeMatch Pro</div>
     <div class="sub-title">AI-Powered Resume Analysis • Professional Matching • Career Insights</div>
 </div>
 """)
@@ -595,12 +787,12 @@ html(f"""
 </div>
 """)
 
-# Professional Sidebar
+# Premium Sidebar
 with st.sidebar:
-    html('<div class="pro-card">')
-    st.header("Settings & Tools")
+    html('<div class="premium-card">')
+    st.header("⚙️ Settings & Tools")
     
-    st.subheader("AI Features")
+    st.subheader("🤖 AI Features")
     openai_api_key = st.text_input(
         "OpenAI API Key", 
         type="password",
@@ -615,25 +807,34 @@ with st.sidebar:
     )
     
     if use_ai_rewrite and not openai_api_key:
-        st.warning("Please add your OpenAI API key to enable AI features")
+        st.warning("🔑 Please add your OpenAI API key to enable AI features")
     
     st.markdown("---")
-    st.subheader("Quick Guide")
+    st.subheader("📚 Quick Guide")
     st.info("""
     **How to use:**
-    1. Upload or paste your resume
-    2. Add the job description
-    3. Click Analyze to get insights
-    4. Review matches and improvements
+    1. 📝 Upload or paste your resume
+    2. 💼 Add the job description
+    3. 📊 Click Analyze to get insights
+    4. 📈 Review matches and improvements
+    """)
+    
+    st.markdown("---")
+    st.subheader("💡 Tips")
+    st.success("""
+    • Be specific in your resume
+    • Include relevant keywords
+    • Highlight measurable achievements
+    • Tailor skills to job requirements
     """)
     html('</div>')
 
-# Main Content Area with Professional Tabs
+# Main Content Area with Premium Tabs
 tab1, tab2, tab3 = st.tabs(["📝 Resume", "💼 Job Description", "📊 Analysis"])
 
 with tab1:
-    html('<div class="pro-card">')
-    st.subheader("Resume Input")
+    html('<div class="premium-card">')
+    st.subheader("📄 Resume Input")
     
     # File upload section
     upload_col1, upload_col2 = st.columns([2, 1])
@@ -654,14 +855,14 @@ with tab1:
             if PdfReader is None:
                 st.error("PyPDF2 required: Install with `pip install PyPDF2`")
             else:
-                with st.spinner("Extracting text from PDF..."):
+                with st.spinner("📄 Extracting text from PDF..."):
                     txt, err = extract_text_from_pdf(uploaded_file)
                     if err:
-                        st.error(f"Error: {err}")
+                        st.error(f"❌ Error: {err}")
                     else:
                         st.session_state["resume_text"] = txt
-                        st.success("PDF extracted successfully!")
-                        with st.expander("Preview extracted text"):
+                        st.success("✅ PDF extracted successfully!")
+                        with st.expander("👁️ Preview extracted text"):
                             st.text_area(
                                 "Extracted Content", 
                                 value=st.session_state["resume_text"][:800] + "..." if len(st.session_state["resume_text"]) > 800 else st.session_state["resume_text"],
@@ -670,7 +871,7 @@ with tab1:
                             )
     
     # Text area for resume
-    st.text_area(
+    resume_text = st.text_area(
         "Paste your resume content:",
         height=300,
         value=st.session_state["resume_text"],
@@ -688,8 +889,11 @@ SKILLS:
 EDUCATION:
 • B.Tech in Computer Science""",
         key="resume_area",
-        on_change=lambda: update_step_progress()
+        on_change=lambda: st.session_state.update({"resume_text": st.session_state.resume_area})
     )
+    
+    # Update session state
+    st.session_state["resume_text"] = resume_text
     
     # Character count
     if st.session_state["resume_text"]:
@@ -701,8 +905,8 @@ EDUCATION:
     
     # AI Improvement Section
     if use_ai_rewrite:
-        html('<div class="pro-card">')
-        st.subheader("AI Resume Improver")
+        html('<div class="premium-card">')
+        st.subheader("🤖 AI Resume Improver")
         
         target_role = st.text_input(
             "Target role (optional):",
@@ -710,30 +914,30 @@ EDUCATION:
             help="AI will tailor improvements for this role"
         )
         
-        if st.button("Improve with AI", use_container_width=True):
+        if st.button("✨ Improve with AI", use_container_width=True):
             if not st.session_state["resume_text"]:
-                st.error("Please add resume content first")
+                st.error("❌ Please add resume content first")
             elif not openai_api_key:
-                st.error("OpenAI API key required")
+                st.error("🔑 OpenAI API key required")
             else:
-                with st.spinner("AI is enhancing your resume..."):
+                with st.spinner("🤖 AI is enhancing your resume..."):
                     improved, err = ai_improve_resume(
                         st.session_state["resume_text"], 
                         openai_api_key, 
                         target_role=target_role
                     )
                     if err:
-                        st.error(f"Error: {err}")
+                        st.error(f"❌ Error: {err}")
                     else:
                         st.session_state["resume_text"] = improved
-                        st.success("Resume improved! Review below")
+                        st.success("✅ Resume improved! Review below")
         html('</div>')
 
 with tab2:
-    html('<div class="pro-card">')
-    st.subheader("Job Description Analysis")
+    html('<div class="premium-card">')
+    st.subheader("💼 Job Description Analysis")
     
-    st.text_area(
+    job_desc_input = st.text_area(
         "Paste the job description:",
         height=300,
         value=st.session_state["job_desc_input"],
@@ -751,8 +955,11 @@ SOFT SKILLS:
 • Team player mentality
 • Problem-solving attitude""",
         key="job_area",
-        on_change=lambda: update_step_progress()
+        on_change=lambda: st.session_state.update({"job_desc_input": st.session_state.job_area})
     )
+    
+    # Update session state
+    st.session_state["job_desc_input"] = job_desc_input
     
     if st.session_state["job_desc_input"]:
         char_count = len(st.session_state["job_desc_input"])
@@ -760,26 +967,27 @@ SOFT SKILLS:
         st.caption(f"📋 {char_count} characters, {word_count} words")
     
     # JD Analysis
-    if st.button("Analyze Job Description", use_container_width=True):
+    if st.button("🔍 Analyze Job Description", use_container_width=True):
         if not st.session_state["job_desc_input"]:
-            st.error("Please add a job description first")
+            st.error("❌ Please add a job description first")
         else:
-            with st.spinner("Analyzing requirements..."):
+            with st.spinner("🔍 Analyzing requirements..."):
                 jd_struct = analyze_job_description(st.session_state["job_desc_input"])
                 
-                col1, col2 = st.columns(2)
+                col1, col2, col3, col4 = st.columns(4)
                 
                 with col1:
-                    st.metric("Detected Job Title", jd_struct["title"])
-                    st.metric("Key Requirements", len(jd_struct["requirements"]))
-                
+                    st.metric("🎯 Detected Job Title", jd_struct["title"])
                 with col2:
+                    st.metric("📋 Key Requirements", len(jd_struct["requirements"]))
+                with col3:
                     tech_skills_count = sum(len(skills) for skills in jd_struct["job_tech"].values())
-                    st.metric("Technical Skills", tech_skills_count)
-                    st.metric("Soft Skills", len(jd_struct["job_soft"]))
+                    st.metric("⚙️ Technical Skills", tech_skills_count)
+                with col4:
+                    st.metric("🤝 Soft Skills", len(jd_struct["job_soft"]))
                 
                 # Skills breakdown
-                with st.expander("Technical Skills Breakdown"):
+                with st.expander("🔧 Technical Skills Breakdown"):
                     for cat, skills in jd_struct["job_tech"].items():
                         if skills:
                             st.write(f"**{cat}:**")
@@ -789,45 +997,54 @@ SOFT SKILLS:
     html('</div>')
 
 with tab3:
-    html('<div class="pro-card">')
-    st.subheader("Resume Match Analysis")
+    html('<div class="premium-card">')
+    st.subheader("📊 Resume Match Analysis")
     
     if not st.session_state["resume_text"] or not st.session_state["job_desc_input"]:
-        st.warning("Please add both resume content and job description to proceed with analysis.")
+        st.warning("⚠️ Please add both resume content and job description to proceed with analysis.")
     else:
-        st.success("Ready for analysis! Click the button below to see how your resume matches the job requirements.")
+        st.success("✅ Ready for analysis! Click the button below to see how your resume matches the job requirements.")
     
     # Central analyze button
-    if st.button("Analyze Resume Match", type="primary", use_container_width=True):
+    if st.button("🚀 Analyze Resume Match", type="primary", use_container_width=True):
         resume_text = st.session_state.get("resume_text", "")
         job_desc_input = st.session_state.get("job_desc_input", "")
         
         if not resume_text.strip():
-            st.error("Please provide your resume content")
+            st.error("❌ Please provide your resume content")
         elif not job_desc_input.strip():
-            st.error("Please provide a job description")
+            st.error("❌ Please provide a job description")
         else:
-            with st.spinner("Analyzing your resume match..."):
+            with st.spinner("🔍 Analyzing your resume match..."):
                 time.sleep(1)
                 score, rtech, rsoft, jtech, jsoft = calculate_ai_match(resume_text, job_desc_input)
                 st.session_state.analysis_complete = True
                 st.session_state.current_step = 4
+                st.session_state.match_score = score
+                st.session_state.analysis_results = {
+                    "rtech": rtech,
+                    "rsoft": rsoft,
+                    "jtech": jtech,
+                    "jsoft": jsoft
+                }
                 
                 # Display Results
                 st.markdown("---")
                 
                 # Score Card
-                html('<div class="pro-card">')
+                html('<div class="score-display">')
                 if score >= 80:
-                    st.success(f"**EXCELLENT MATCH - {score}%**")
+                    st.success(f"**🎉 EXCELLENT MATCH**")
                     st.info("Your resume strongly aligns with this job requirement!")
                 elif score >= 60:
-                    st.warning(f"**GOOD MATCH - {score}%**")
+                    st.warning(f"**👍 GOOD MATCH**")
                     st.info("Good foundation with some areas for improvement.")
                 else:
-                    st.error(f"**NEEDS IMPROVEMENT - {score}%**")
+                    st.error(f"**📈 NEEDS IMPROVEMENT**")
                     st.info("Focus on developing the missing skills below.")
                 
+                html(f'<div class="score-value">{score}%</div>')
+                html('<div class="score-label">Match Score</div>')
                 st.progress(score / 100)
                 html('</div>')
                 
@@ -836,7 +1053,7 @@ with tab3:
                 strong_list, missing_list = [], []
                 
                 with col_left:
-                    html('<div class="pro-card">')
+                    html('<div class="premium-card">')
                     st.subheader("✅ Your Strong Points")
                     any_strong = False
                     
@@ -852,17 +1069,17 @@ with tab3:
                     matched_soft = set(rsoft) & set(jsoft)
                     if matched_soft:
                         any_strong = True
-                        st.write("**Soft Skills**")
+                        st.write("**🤝 Soft Skills**")
                         for s in matched_soft:
                             strong_list.append(f"Soft: {s}")
                             st.markdown(f'<span class="skill-tag strong">✓ {s}</span>', unsafe_allow_html=True)
                     
                     if not any_strong:
-                        st.info("No strong matching points detected.")
+                        st.info("ℹ️ No strong matching points detected.")
                     html('</div>')
                 
                 with col_right:
-                    html('<div class="pro-card">')
+                    html('<div class="premium-card">')
                     st.subheader("📚 Improvement Areas")
                     any_missing = False
                     
@@ -878,18 +1095,18 @@ with tab3:
                     missing_soft = set(jsoft) - set(rsoft)
                     if missing_soft:
                         any_missing = True
-                        st.write("**Soft Skills**")
+                        st.write("**🤝 Soft Skills**")
                         for s in list(missing_soft)[:2]:
                             missing_list.append(f"Soft: {s}")
                             st.markdown(f'<span class="skill-tag improve">+ {s}</span>', unsafe_allow_html=True)
                     
                     if not any_missing:
-                        st.success("Excellent! No major skill gaps found.")
+                        st.success("🎉 Excellent! No major skill gaps found.")
                     html('</div>')
                 
                 # Generate and Download Report
-                html('<div class="pro-card">')
-                st.subheader("Download Report")
+                html('<div class="premium-card">')
+                st.subheader("📥 Download Report")
                 
                 jd_title = analyze_job_description(job_desc_input)['title']
                 report_text = generate_text_report(score, strong_list, missing_list, job_title=jd_title)
@@ -906,7 +1123,7 @@ with tab3:
     
     html('</div>')
 
-# Professional Footer
+# Premium Footer
 html("""
 <div style='
     text-align:center; 
@@ -914,12 +1131,13 @@ html("""
     margin-top:3rem; 
     padding:2rem; 
     background:white;
-    border-radius:12px;
+    border-radius:16px;
     border:1px solid #e2e8f0;
+    box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
 '>
-    <div style='font-weight:600; margin-bottom:0.5rem; font-size:1.1rem;'>ResumeMatch</div>
-    <div style='font-size:0.95rem; margin-bottom:0.5rem;'>Professional Resume Analysis Tool</div>
-    <div style='font-size:0.85rem; color:#94a3b8;'>Built for Career Success</div>
-    <div style='font-size:0.85rem; color:#94a3b8;'>2025 ResumeMatch. All rights reserved.</div>
+    <div style='font-weight:700; margin-bottom:0.5rem; font-size:1.25rem; color:#1e293b;'>ResumeMatch Pro</div>
+    <div style='font-size:0.95rem; margin-bottom:0.5rem; color:#64748b;'>Professional Resume Analysis Tool</div>
+    <div style='font-size:0.85rem; color:#94a3b8;'>Built for Career Success • Powered by AI</div>
+    <div style='font-size:0.85rem; color:#94a3b8; margin-top:0.5rem;'>© 2025 ResumeMatch Pro. All rights reserved.</div>
 </div>
 """)
