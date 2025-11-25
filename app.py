@@ -1,4 +1,4 @@
-# app.py - AI Resume Matcher Pro (FIXED UI + Visible Colors)
+# app.py - AI Resume Matcher Pro (ULTRA ATTRACTIVE + MOBILE FRIENDLY)
 import streamlit as st
 import pandas as pd
 import numpy as np
@@ -32,7 +32,7 @@ except Exception:
     openai = None
 
 # ----------------------------
-# Page config - FIXED FOR VISIBILITY
+# Page config
 # ----------------------------
 st.set_page_config(
     page_title="ResumeMatch AI - Smart Resume Analysis", 
@@ -62,138 +62,175 @@ def load_lottie_url_safe(url):
 
 lottie_tech = load_lottie_url_safe("https://assets1.lottiefiles.com/packages/lf20_ukgq8loj.json")
 lottie_success = load_lottie_url_safe("https://assets1.lottiefiles.com/packages/lf20_x17ybolp.json")
+lottie_upload = load_lottie_url_safe("https://assets1.lottiefiles.com/packages/lf20_5tkzkflw.json")
 
 # ----------------------------
-# FIXED CSS - LIGHT COLORS + PROPER VISIBILITY
+# ULTRA ATTRACTIVE CSS WITH ANIMATIONS
 # ----------------------------
 st.markdown(
     """
 <style>
 /* ===== FIX STREAMLIT DEFAULT SPACING ===== */
 .main .block-container {
-    padding-top: 2rem !important;
-    padding-bottom: 2rem !important;
-    padding-left: 2rem !important;
-    padding-right: 2rem !important;
+    padding-top: 1rem !important;
+    padding-bottom: 1rem !important;
+    padding-left: 1rem !important;
+    padding-right: 1rem !important;
     max-width: 1400px !important;
 }
 
-/* ===== CLEAN WHITE BACKGROUND ===== */
+/* ===== MODERN GRADIENT BACKGROUND ===== */
 .stApp {
-    background: linear-gradient(135deg, #ffffff 0%, #f8fafc 100%) !important;
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%) !important;
     font-family: 'Inter', 'Segoe UI', system-ui, sans-serif !important;
+    background-attachment: fixed !important;
 }
 
-/* ===== FIXED HEADER - LIGHT & VISIBLE ===== */
-.app-header {
-    background: linear-gradient(135deg, #4f46e5 0%, #7c3aed 100%) !important;
-    padding: 2rem 2.5rem !important;
-    border-radius: 20px !important;
-    box-shadow: 0 10px 40px rgba(79, 70, 229, 0.15) !important;
+/* ===== GLASS MORPHISM HEADER ===== */
+.glass-header {
+    background: rgba(255, 255, 255, 0.25) !important;
+    backdrop-filter: blur(20px) !important;
+    -webkit-backdrop-filter: blur(20px) !important;
+    padding: 2.5rem 3rem !important;
+    border-radius: 24px !important;
+    border: 1px solid rgba(255, 255, 255, 0.3) !important;
+    box-shadow: 0 15px 50px rgba(0, 0, 0, 0.1) !important;
     margin-bottom: 2rem !important;
     text-align: center !important;
-    border: 1px solid #e2e8f0 !important;
+    animation: fadeInUp 0.8s ease-out !important;
 }
 
-.app-main-title {
-    font-size: 2.5rem !important;
+.main-title {
+    font-size: 3rem !important;
     font-weight: 800 !important;
-    color: white !important;
+    background: linear-gradient(45deg, #FF6B6B, #4ECDC4, #45B7D1, #96CEB4) !important;
+    background-size: 300% 300% !important;
+    -webkit-background-clip: text !important;
+    -webkit-text-fill-color: transparent !important;
+    animation: gradientShift 3s ease infinite !important;
     margin: 0 !important;
-    text-shadow: 0 2px 4px rgba(0, 0, 0, 0.1) !important;
+    text-shadow: 0 4px 8px rgba(0, 0, 0, 0.1) !important;
 }
 
-.app-subtitle {
+.sub-title {
     color: rgba(255, 255, 255, 0.9) !important;
-    font-size: 1.2rem !important;
+    font-size: 1.3rem !important;
     font-weight: 400 !important;
-    margin: 0.5rem 0 0 0 !important;
+    margin: 1rem 0 0 0 !important;
+    animation: fadeIn 1s ease-out 0.3s both !important;
 }
 
-/* ===== CLEAN WHITE CARDS ===== */
-.clean-card {
-    background: white !important;
-    padding: 2rem !important;
-    border-radius: 16px !important;
-    border: 1px solid #e2e8f0 !important;
-    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08) !important;
-    margin-bottom: 1.5rem !important;
-    transition: all 0.3s ease !important;
+/* ===== GLASS MORPHISM CARDS ===== */
+.glass-card {
+    background: rgba(255, 255, 255, 0.15) !important;
+    backdrop-filter: blur(15px) !important;
+    -webkit-backdrop-filter: blur(15px) !important;
+    padding: 2.5rem !important;
+    border-radius: 20px !important;
+    border: 1px solid rgba(255, 255, 255, 0.2) !important;
+    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1) !important;
+    margin-bottom: 2rem !important;
+    transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275) !important;
+    animation: slideInUp 0.6s ease-out !important;
 }
 
-.clean-card:hover {
-    box-shadow: 0 8px 30px rgba(0, 0, 0, 0.12) !important;
-    transform: translateY(-2px) !important;
+.glass-card:hover {
+    transform: translateY(-8px) scale(1.01) !important;
+    box-shadow: 0 20px 60px rgba(0, 0, 0, 0.15) !important;
+    border-color: rgba(255, 255, 255, 0.4) !important;
 }
 
-/* ===== IMPROVED BUTTONS - VISIBLE COLORS ===== */
+/* ===== ANIMATED BUTTONS ===== */
 .stButton > button {
-    background: linear-gradient(135deg, #4f46e5 0%, #7c3aed 100%) !important;
+    background: linear-gradient(135deg, #FF6B6B 0%, #4ECDC4 100%) !important;
     color: white !important;
     border: none !important;
-    border-radius: 12px !important;
-    padding: 0.8rem 2rem !important;
-    font-weight: 600 !important;
-    font-size: 1rem !important;
-    transition: all 0.3s ease !important;
-    box-shadow: 0 4px 15px rgba(79, 70, 229, 0.3) !important;
+    border-radius: 15px !important;
+    padding: 1rem 2.5rem !important;
+    font-weight: 700 !important;
+    font-size: 1.1rem !important;
+    transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275) !important;
+    box-shadow: 0 8px 25px rgba(255, 107, 107, 0.3) !important;
     width: 100% !important;
+    position: relative !important;
+    overflow: hidden !important;
+}
+
+.stButton > button::before {
+    content: '' !important;
+    position: absolute !important;
+    top: 0 !important;
+    left: -100% !important;
+    width: 100% !important;
+    height: 100% !important;
+    background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.2), transparent) !important;
+    transition: left 0.5s !important;
+}
+
+.stButton > button:hover::before {
+    left: 100% !important;
 }
 
 .stButton > button:hover {
-    transform: translateY(-2px) !important;
-    box-shadow: 0 6px 20px rgba(79, 70, 229, 0.4) !important;
-    background: linear-gradient(135deg, #4338ca 0%, #6d28d9 100%) !important;
+    transform: translateY(-4px) scale(1.05) !important;
+    box-shadow: 0 15px 35px rgba(255, 107, 107, 0.4) !important;
+    background: linear-gradient(135deg, #FF8E8E 0%, #6BE8E1 100%) !important;
 }
 
-/* ===== CLEAR INPUT FIELDS ===== */
+/* ===== CLEAR VISIBLE TEXT AREAS ===== */
 .stTextArea textarea {
-    background: #f8fafc !important;
-    border-radius: 12px !important;
-    padding: 1rem !important;
-    border: 2px solid #e2e8f0 !important;
-    font-size: 0.95rem !important;
-    line-height: 1.5 !important;
+    background: rgba(255, 255, 255, 0.95) !important;
+    border-radius: 15px !important;
+    padding: 1.2rem !important;
+    border: 2px solid rgba(255, 255, 255, 0.3) !important;
+    font-size: 1rem !important;
+    line-height: 1.6 !important;
     transition: all 0.3s ease !important;
-    color: #1e293b !important;
+    color: #2D3748 !important;
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1) !important;
 }
 
 .stTextArea textarea:focus {
-    border-color: #4f46e5 !important;
-    box-shadow: 0 0 0 3px rgba(79, 70, 229, 0.1) !important;
+    border-color: #4ECDC4 !important;
+    box-shadow: 0 0 0 3px rgba(78, 205, 196, 0.2) !important;
     background: white !important;
+    transform: scale(1.02) !important;
 }
 
 .stTextArea textarea::placeholder {
-    color: #64748b !important;
+    color: #718096 !important;
+    font-style: italic !important;
 }
 
-/* ===== VISIBLE SKILL TAGS ===== */
+/* ===== ANIMATED SKILL TAGS ===== */
 .skill-tag {
     display: inline-block !important;
-    margin: 0.3rem !important;
-    padding: 0.5rem 1rem !important;
-    border-radius: 20px !important;
-    background: linear-gradient(135deg, #4f46e5 0%, #7c3aed 100%) !important;
+    margin: 0.4rem !important;
+    padding: 0.6rem 1.2rem !important;
+    border-radius: 25px !important;
+    background: linear-gradient(135deg, #FF6B6B 0%, #4ECDC4 100%) !important;
     color: white !important;
-    font-weight: 600 !important;
-    font-size: 0.85rem !important;
-    box-shadow: 0 2px 8px rgba(79, 70, 229, 0.2) !important;
-    transition: all 0.2s ease !important;
+    font-weight: 700 !important;
+    font-size: 0.9rem !important;
+    box-shadow: 0 4px 15px rgba(255, 107, 107, 0.3) !important;
+    transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275) !important;
+    animation: popIn 0.5s ease-out !important;
+    cursor: pointer !important;
 }
 
 .skill-tag:hover {
-    transform: scale(1.05) !important;
-    box-shadow: 0 4px 12px rgba(79, 70, 229, 0.3) !important;
+    transform: scale(1.1) rotate(2deg) !important;
+    box-shadow: 0 6px 20px rgba(255, 107, 107, 0.4) !important;
 }
 
-/* ===== STEP INDICATOR - VISIBLE ===== */
+/* ===== FLOATING STEP INDICATOR ===== */
 .step-indicator {
     display: flex !important;
     justify-content: space-between !important;
     align-items: center !important;
-    margin: 2rem 0 !important;
+    margin: 3rem 0 !important;
     position: relative !important;
+    animation: fadeInUp 0.8s ease-out 0.2s both !important;
 }
 
 .step {
@@ -202,110 +239,180 @@ st.markdown(
     align-items: center !important;
     flex: 1 !important;
     position: relative !important;
+    z-index: 2 !important;
 }
 
 .step-number {
-    width: 45px !important;
-    height: 45px !important;
+    width: 60px !important;
+    height: 60px !important;
     border-radius: 50% !important;
-    background: #f1f5f9 !important;
-    color: #64748b !important;
+    background: rgba(255, 255, 255, 0.2) !important;
+    color: white !important;
     display: flex !important;
     align-items: center !important;
     justify-content: center !important;
-    font-weight: 700 !important;
-    margin-bottom: 0.5rem !important;
-    z-index: 2 !important;
-    transition: all 0.3s ease !important;
-    border: 2px solid #e2e8f0 !important;
+    font-weight: 800 !important;
+    margin-bottom: 0.8rem !important;
+    border: 3px solid rgba(255, 255, 255, 0.3) !important;
+    transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275) !important;
+    font-size: 1.2rem !important;
+    box-shadow: 0 8px 25px rgba(0, 0, 0, 0.15) !important;
 }
 
 .step.active .step-number {
-    background: linear-gradient(135deg, #4f46e5 0%, #7c3aed 100%) !important;
-    color: white !important;
-    box-shadow: 0 4px 15px rgba(79, 70, 229, 0.4) !important;
-    border-color: #4f46e5 !important;
+    background: linear-gradient(135deg, #FF6B6B 0%, #4ECDC4 100%) !important;
+    transform: scale(1.2) !important;
+    box-shadow: 0 12px 35px rgba(255, 107, 107, 0.4) !important;
+    border-color: rgba(255, 255, 255, 0.5) !important;
+    animation: pulse 2s infinite !important;
 }
 
 .step-line {
     position: absolute !important;
-    top: 22px !important;
+    top: 30px !important;
     left: 50% !important;
     right: -50% !important;
-    height: 3px !important;
-    background: #e2e8f0 !important;
+    height: 4px !important;
+    background: rgba(255, 255, 255, 0.2) !important;
     z-index: 1 !important;
+    transition: all 0.4s ease !important;
 }
 
 .step.active .step-line {
-    background: #4f46e5 !important;
+    background: linear-gradient(90deg, #FF6B6B, #4ECDC4) !important;
+    box-shadow: 0 2px 10px rgba(255, 107, 107, 0.3) !important;
 }
 
 .step-label {
-    font-size: 0.9rem !important;
-    color: #64748b !important;
-    font-weight: 500 !important;
+    font-size: 1rem !important;
+    color: rgba(255, 255, 255, 0.9) !important;
+    font-weight: 600 !important;
     text-align: center !important;
+    text-shadow: 0 2px 4px rgba(0, 0, 0, 0.2) !important;
+    transition: all 0.3s ease !important;
 }
 
 .step.active .step-label {
-    color: #4f46e5 !important;
-    font-weight: 600 !important;
+    color: white !important;
+    transform: scale(1.1) !important;
+    text-shadow: 0 4px 8px rgba(0, 0, 0, 0.3) !important;
 }
 
-/* ===== TAB STYLING ===== */
+/* ===== ANIMATED TAB STYLING ===== */
 .stTabs [data-baseweb="tab-list"] {
-    gap: 2rem !important;
-    background-color: #f8fafc !important;
-    padding: 0.5rem !important;
-    border-radius: 12px !important;
+    gap: 1rem !important;
+    background-color: rgba(255, 255, 255, 0.1) !important;
+    padding: 0.8rem !important;
+    border-radius: 20px !important;
+    backdrop-filter: blur(10px) !important;
+    border: 1px solid rgba(255, 255, 255, 0.2) !important;
 }
 
 .stTabs [data-baseweb="tab"] {
-    height: 50px !important;
-    background-color: #f8fafc !important;
-    border-radius: 8px !important;
-    padding: 0 1rem !important;
-    font-weight: 500 !important;
+    height: 60px !important;
+    background-color: transparent !important;
+    border-radius: 15px !important;
+    padding: 0 1.5rem !important;
+    font-weight: 600 !important;
+    color: rgba(255, 255, 255, 0.8) !important;
+    transition: all 0.3s ease !important;
+    border: 2px solid transparent !important;
 }
 
 .stTabs [aria-selected="true"] {
-    background-color: white !important;
-    color: #4f46e5 !important;
-    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1) !important;
+    background: linear-gradient(135deg, #FF6B6B 0%, #4ECDC4 100%) !important;
+    color: white !important;
+    box-shadow: 0 8px 25px rgba(255, 107, 107, 0.3) !important;
+    transform: translateY(-2px) !important;
+    border-color: rgba(255, 255, 255, 0.3) !important;
 }
 
-/* ===== PROGRESS BAR ===== */
+/* ===== ANIMATED PROGRESS BAR ===== */
 .stProgress > div > div > div {
-    background: linear-gradient(90deg, #4f46e5 0%, #7c3aed 100%) !important;
+    background: linear-gradient(90deg, #FF6B6B 0%, #4ECDC4 100%) !important;
     border-radius: 10px !important;
+    animation: progressFill 2s ease-in-out !important;
+}
+
+/* ===== ANIMATIONS ===== */
+@keyframes fadeInUp {
+    from {
+        opacity: 0;
+        transform: translateY(30px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+@keyframes fadeIn {
+    from { opacity: 0; }
+    to { opacity: 1; }
+}
+
+@keyframes slideInUp {
+    from {
+        opacity: 0;
+        transform: translateY(50px) scale(0.9);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0) scale(1);
+    }
+}
+
+@keyframes gradientShift {
+    0% { background-position: 0% 50%; }
+    50% { background-position: 100% 50%; }
+    100% { background-position: 0% 50%; }
+}
+
+@keyframes popIn {
+    0% { transform: scale(0); opacity: 0; }
+    70% { transform: scale(1.1); }
+    100% { transform: scale(1); opacity: 1; }
+}
+
+@keyframes pulse {
+    0% { box-shadow: 0 0 0 0 rgba(255, 107, 107, 0.4); }
+    70% { box-shadow: 0 0 0 15px rgba(255, 107, 107, 0); }
+    100% { box-shadow: 0 0 0 0 rgba(255, 107, 107, 0); }
+}
+
+@keyframes progressFill {
+    from { width: 0% !important; }
+    to { width: 100% !important; }
 }
 
 /* ===== MOBILE RESPONSIVENESS ===== */
 @media (max-width: 768px) {
     .main .block-container {
-        padding: 1rem !important;
+        padding: 0.5rem !important;
     }
     
-    .app-header {
+    .glass-header {
         padding: 1.5rem 1rem !important;
+        border-radius: 20px !important;
     }
     
-    .app-main-title {
-        font-size: 1.8rem !important;
+    .main-title {
+        font-size: 2rem !important;
     }
     
-    .app-subtitle {
+    .sub-title {
         font-size: 1rem !important;
     }
     
-    .clean-card {
+    .glass-card {
         padding: 1.5rem !important;
+        border-radius: 15px !important;
     }
     
     .step-indicator {
         flex-wrap: wrap !important;
         gap: 1rem !important;
+        margin: 2rem 0 !important;
     }
     
     .step {
@@ -313,8 +420,34 @@ st.markdown(
         margin-bottom: 1rem !important;
     }
     
+    .step-number {
+        width: 50px !important;
+        height: 50px !important;
+        font-size: 1rem !important;
+    }
+    
     .step-line {
         display: none !important;
+    }
+    
+    .stButton > button {
+        padding: 0.8rem 1.5rem !important;
+        font-size: 1rem !important;
+    }
+    
+    .skill-tag {
+        font-size: 0.8rem !important;
+        padding: 0.5rem 1rem !important;
+    }
+}
+
+@media (max-width: 480px) {
+    .step {
+        flex: 0 0 100% !important;
+    }
+    
+    .main-title {
+        font-size: 1.6rem !important;
     }
 }
 
@@ -323,35 +456,36 @@ st.markdown(
 footer {visibility: hidden;}
 header {visibility: hidden;}
 
-/* ===== BETTER METRICS ===== */
+/* ===== ANIMATED METRICS ===== */
 [data-testid="metric-container"] {
-    background: white !important;
-    border: 1px solid #e2e8f0 !important;
-    border-radius: 12px !important;
-    padding: 1rem !important;
-    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05) !important;
+    background: rgba(255, 255, 255, 0.15) !important;
+    backdrop-filter: blur(10px) !important;
+    border: 1px solid rgba(255, 255, 255, 0.2) !important;
+    border-radius: 15px !important;
+    padding: 1.5rem !important;
+    box-shadow: 0 8px 25px rgba(0, 0, 0, 0.1) !important;
+    transition: all 0.3s ease !important;
+    animation: slideInUp 0.6s ease-out !important;
 }
 
-/* ===== SUCCESS/ERROR/WARNING MESSAGES ===== */
-.stSuccess {
-    background: linear-gradient(135deg, #10b981 0%, #059669 100%) !important;
-    color: white !important;
-    border-radius: 12px !important;
-    border: none !important;
+[data-testid="metric-container"]:hover {
+    transform: translateY(-5px) !important;
+    box-shadow: 0 15px 35px rgba(0, 0, 0, 0.15) !important;
 }
 
-.stError {
-    background: linear-gradient(135deg, #ef4444 0%, #dc2626 100%) !important;
-    color: white !important;
-    border-radius: 12px !important;
-    border: none !important;
+/* ===== FLOATING ACTION BUTTON ===== */
+.floating-btn {
+    position: fixed !important;
+    bottom: 2rem !important;
+    right: 2rem !important;
+    z-index: 1000 !important;
+    animation: bounce 2s infinite !important;
 }
 
-.stWarning {
-    background: linear-gradient(135deg, #f59e0b 0%, #d97706 100%) !important;
-    color: white !important;
-    border-radius: 12px !important;
-    border: none !important;
+@keyframes bounce {
+    0%, 20%, 50%, 80%, 100% {transform: translateY(0);}
+    40% {transform: translateY(-10px);}
+    60% {transform: translateY(-5px);}
 }
 </style>
 """,
@@ -510,18 +644,18 @@ def generate_report_pdf(match_score, resume_text, job_desc, strong_points, impro
     return out
 
 # ----------------------------
-# FIXED UI BUILDING
+# ULTRA ATTRACTIVE UI BUILDING
 # ----------------------------
 
-# FIXED HEADER - Now clearly visible
+# ANIMATED GLASS HEADER
 html(f"""
-<div class="app-header">
-    <div class="app-main-title">🚀 ResumeMatch AI</div>
-    <div class="app-subtitle">Smart Resume Analysis • AI-Powered Matching • Professional Reports</div>
+<div class="glass-header">
+    <div class="main-title">🚀 ResumeMatch AI</div>
+    <div class="sub-title">Smart Resume Analysis • AI-Powered Matching • Professional Reports</div>
 </div>
 """)
 
-# Step Indicator
+# FLOATING STEP INDICATOR
 html("""
 <div class="step-indicator">
     <div class="step active">
@@ -547,9 +681,9 @@ html("""
 </div>
 """)
 
-# Enhanced Sidebar
+# Enhanced Sidebar with Glass Effect
 with st.sidebar:
-    html('<div class="clean-card">')
+    html('<div class="glass-card">')
     st.header("⚙️ Settings & Tools")
     
     st.subheader("AI Features")
@@ -588,25 +722,32 @@ if "job_desc_input" not in st.session_state:
 if "current_step" not in st.session_state:
     st.session_state["current_step"] = 1
 
-# Main Content Area with Tabs
+# Main Content Area with Animated Tabs
 tab1, tab2, tab3 = st.tabs(["📝 Resume Input", "💼 Job Analysis", "📊 Match Results"])
 
 with tab1:
-    html('<div class="clean-card">')
-    st.subheader("📄 Your Resume Content")
+    html('<div class="glass-card">')
     
-    # File upload section
-    col1, col2 = st.columns([1, 1])
-    with col1:
-        upload_mode = st.radio(
-            "Choose input method:",
-            ["📋 Paste Text", "📁 Upload PDF"],
-            horizontal=True
-        )
+    # Header with animation
+    col_header = st.columns([3, 1])
+    with col_header[0]:
+        st.subheader("📄 Your Resume Content")
+    with col_header[1]:
+        if lottie_upload:
+            st_lottie(lottie_upload, height=80, key="upload_anim")
+    
+    # File upload section with better styling
+    st.markdown("### 📥 Choose Input Method")
+    upload_mode = st.radio(
+        "",
+        ["📋 Paste Text", "📁 Upload PDF"],
+        horizontal=True,
+        label_visibility="collapsed"
+    )
     
     if upload_mode == "📁 Upload PDF":
         uploaded_file = st.file_uploader(
-            "Upload your resume PDF",
+            "Drag & drop or click to upload your resume PDF",
             type=["pdf"],
             help="Supported: PDF files up to 10MB"
         )
@@ -621,7 +762,7 @@ with tab1:
                     else:
                         st.session_state["resume_text"] = txt
                         st.success("✅ PDF extracted successfully!")
-                        with st.expander("👀 Preview extracted text"):
+                        with st.expander("👀 Preview extracted text", expanded=True):
                             st.text_area(
                                 "Extracted Content", 
                                 value=st.session_state["resume_text"][:1000] + "..." if len(st.session_state["resume_text"]) > 1000 else st.session_state["resume_text"],
@@ -629,9 +770,10 @@ with tab1:
                                 key="preview_area"
                             )
     
-    # Text area for resume
+    # Text area for resume - NOW PERFECTLY VISIBLE
+    st.markdown("### ✍️ Your Resume Content")
     st.session_state["resume_text"] = st.text_area(
-        "Paste or edit your resume content:",
+        "Paste or edit your resume content below:",
         height=300,
         value=st.session_state["resume_text"],
         placeholder="""EXPERIENCE:
@@ -647,24 +789,31 @@ SKILLS:
 
 EDUCATION:
 • B.Tech in Computer Science - 8.5 CGPA""",
-        key="resume_area"
+        key="resume_area",
+        label_visibility="collapsed"
     )
     
-    # Character count
+    # Character count with animation
     if st.session_state["resume_text"]:
         char_count = len(st.session_state["resume_text"])
         word_count = len(st.session_state["resume_text"].split())
-        st.caption(f"📊 {char_count} characters, {word_count} words")
+        col_stats = st.columns(3)
+        with col_stats[0]:
+            st.metric("📝 Characters", char_count)
+        with col_stats[1]:
+            st.metric("📊 Words", word_count)
+        with col_stats[2]:
+            st.metric("📄 Pages", f"{(char_count / 1500):.1f}")
     
     html('</div>')
     
     # AI Improvement Section
     if use_ai_rewrite:
-        html('<div class="clean-card">')
+        html('<div class="glass-card">')
         st.subheader("🤖 AI Resume Improver")
         
         target_role = st.text_input(
-            "Target role (optional):",
+            "🎯 Target role (optional):",
             placeholder="e.g., Full Stack Developer, Data Scientist",
             help="AI will tailor improvements for this specific role"
         )
@@ -689,11 +838,11 @@ EDUCATION:
         html('</div>')
 
 with tab2:
-    html('<div class="clean-card">')
+    html('<div class="glass-card">')
     st.subheader("💼 Job Description Analysis")
     
     st.session_state["job_desc_input"] = st.text_area(
-        "Paste the job description:",
+        "📋 Paste the job description:",
         height=300,
         value=st.session_state["job_desc_input"],
         placeholder="""JOB TITLE: Full Stack Developer
@@ -743,7 +892,7 @@ SOFT SKILLS:
                     st.metric("💬 Soft Skills", len(jd_struct["job_soft"]))
                 
                 # Skills breakdown
-                with st.expander("🔧 Technical Skills Breakdown"):
+                with st.expander("🔧 Technical Skills Breakdown", expanded=True):
                     for cat, skills in jd_struct["job_tech"].items():
                         if skills:
                             st.write(f"**{cat}:**")
@@ -752,7 +901,7 @@ SOFT SKILLS:
                                 cols[i % 3].markdown(f"<span class='skill-tag'>{skill}</span>", unsafe_allow_html=True)
                 
                 if jd_struct["job_soft"]:
-                    with st.expander("💬 Soft Skills Required"):
+                    with st.expander("💬 Soft Skills Required", expanded=True):
                         cols = st.columns(3)
                         for i, skill in enumerate(jd_struct["job_soft"]):
                             cols[i % 3].markdown(f"<span class='skill-tag'>{skill}</span>", unsafe_allow_html=True)
@@ -760,7 +909,7 @@ SOFT SKILLS:
     html('</div>')
 
 with tab3:
-    html('<div class="clean-card">')
+    html('<div class="glass-card">')
     st.subheader("🚀 Ready to Analyze!")
     
     st.info("""
@@ -771,7 +920,7 @@ with tab3:
     4. 📥 Download your personalized report
     """)
     
-    # Central analyze button
+    # Central analyze button with animation
     col_center = st.columns([1, 2, 1])
     with col_center[1]:
         analyze_btn = st.button("🎯 Analyze Resume Match", use_container_width=True, type="primary")
@@ -793,7 +942,7 @@ with tab3:
                 st.markdown("---")
                 
                 # Score Card
-                html('<div class="clean-card">')
+                html('<div class="glass-card">')
                 col_score1, col_score2, col_score3 = st.columns([1, 2, 1])
                 
                 with col_score2:
@@ -826,7 +975,7 @@ with tab3:
                 strong_list, missing_list = [], []
                 
                 with col_skills1:
-                    html('<div class="clean-card">')
+                    html('<div class="glass-card">')
                     st.subheader("✅ Your Strong Points")
                     any_strong = False
                     for cat in rtech:
@@ -849,7 +998,7 @@ with tab3:
                     html('</div>')
                 
                 with col_skills2:
-                    html('<div class="clean-card">')
+                    html('<div class="glass-card">')
                     st.subheader("📚 Improvement Areas")
                     any_missing = False
                     for cat in jtech:
@@ -883,13 +1032,13 @@ with tab3:
                         name="Your Skills", 
                         x=cats, 
                         y=resume_counts,
-                        marker_color='#4f46e5'
+                        marker_color='#4ECDC4'
                     ))
                     fig.add_trace(go.Bar(
                         name="Required Skills", 
                         x=cats, 
                         y=job_counts,
-                        marker_color='#7c3aed'
+                        marker_color='#FF6B6B'
                     ))
                     fig.update_layout(
                         title="Skill Distribution Comparison",
@@ -902,7 +1051,7 @@ with tab3:
                     pass
                 
                 # Download Report
-                html('<div class="clean-card">')
+                html('<div class="glass-card">')
                 st.subheader("📥 Download Your Report")
                 
                 jd_title = analyze_job_description(job_desc_input)['title'] if job_desc_input else ""
@@ -922,11 +1071,21 @@ with tab3:
     
     html('</div>')
 
-# Enhanced Footer
+# Animated Footer
 html("""
-<div style='text-align:center; color:#64748b; margin-top:3rem; padding:2rem; background:white; border-radius:16px; border:1px solid #e2e8f0;'>
-    <div style='font-weight:700; margin-bottom:0.5rem; font-size:1.1rem;'>🚀 ResumeMatch AI</div>
-    <div style='font-size:0.95rem;'>AI-Powered Resume Analysis • Professional Matching • Career Optimization</div>
-    <div style='font-size:0.85rem; margin-top:0.8rem; color:#94a3b8;'>Built with ❤️ using Streamlit</div>
+<div style='
+    text-align:center; 
+    color:rgba(255,255,255,0.9); 
+    margin-top:3rem; 
+    padding:2.5rem; 
+    background:rgba(255,255,255,0.1);
+    backdrop-filter:blur(10px);
+    border-radius:20px;
+    border:1px solid rgba(255,255,255,0.2);
+    animation:fadeInUp 0.8s ease-out;
+'>
+    <div style='font-weight:800; margin-bottom:0.8rem; font-size:1.3rem;'>🚀 ResumeMatch AI</div>
+    <div style='font-size:1rem; margin-bottom:0.5rem;'>AI-Powered Resume Analysis • Professional Matching • Career Optimization</div>
+    <div style='font-size:0.9rem; color:rgba(255,255,255,0.7);'>Built with ❤️ using Streamlit</div>
 </div>
 """)
