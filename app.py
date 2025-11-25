@@ -1,11 +1,11 @@
-# app.py - AI Resume Matcher Pro (ULTRA ATTRACTIVE + MOBILE FRIENDLY)
+# app.py - AI Resume Matcher Pro (PROFESSIONAL + BUG-FREE)
 import streamlit as st
 import pandas as pd
 import numpy as np
 import time
 import re
 from io import BytesIO
-from fpdf import FPDF
+import base64
 
 # ML / text
 from sklearn.feature_extraction.text import CountVectorizer
@@ -17,14 +17,6 @@ try:
 except Exception:
     PdfReader = None
 
-# Lottie (optional)
-try:
-    from streamlit_lottie import st_lottie
-    import requests
-except Exception:
-    st_lottie = None
-    requests = None
-
 # Optional OpenAI (for resume improver)
 try:
     import openai
@@ -35,10 +27,10 @@ except Exception:
 # Page config
 # ----------------------------
 st.set_page_config(
-    page_title="ResumeMatch AI - Smart Resume Analysis", 
+    page_title="ResumeMatch Pro - AI Resume Analyzer", 
     page_icon="💼", 
     layout="wide",
-    initial_sidebar_state="collapsed"
+    initial_sidebar_state="expanded"
 )
 
 # ----------------------------
@@ -48,29 +40,38 @@ def html(content):
     st.markdown(content, unsafe_allow_html=True)
 
 # ----------------------------
-# Utilities
+# Session State Management
 # ----------------------------
-def load_lottie_url_safe(url):
-    if not requests:
-        return None
-    try:
-        r = requests.get(url, timeout=5)
-        if r.status_code == 200:
-            return r.json()
-    except:
-        return None
-
-lottie_tech = load_lottie_url_safe("https://assets1.lottiefiles.com/packages/lf20_ukgq8loj.json")
-lottie_success = load_lottie_url_safe("https://assets1.lottiefiles.com/packages/lf20_x17ybolp.json")
-lottie_upload = load_lottie_url_safe("https://assets1.lottiefiles.com/packages/lf20_5tkzkflw.json")
+if "resume_text" not in st.session_state:
+    st.session_state["resume_text"] = ""
+if "job_desc_input" not in st.session_state:
+    st.session_state["job_desc_input"] = ""
+if "current_step" not in st.session_state:
+    st.session_state["current_step"] = 1
+if "analysis_complete" not in st.session_state:
+    st.session_state["analysis_complete"] = False
 
 # ----------------------------
-# ULTRA ATTRACTIVE CSS WITH ANIMATIONS
+# PROFESSIONAL CSS - HR FRIENDLY
 # ----------------------------
 st.markdown(
     """
 <style>
-/* ===== FIX STREAMLIT DEFAULT SPACING ===== */
+/* ===== PROFESSIONAL COLOR SCHEME ===== */
+:root {
+    --primary: #2563eb;
+    --primary-dark: #1d4ed8;
+    --secondary: #64748b;
+    --success: #10b981;
+    --warning: #f59e0b;
+    --error: #ef4444;
+    --background: #f8fafc;
+    --surface: #ffffff;
+    --text: #1e293b;
+    --text-light: #64748b;
+}
+
+/* ===== MAIN CONTAINER ===== */
 .main .block-container {
     padding-top: 1rem !important;
     padding-bottom: 1rem !important;
@@ -79,158 +80,132 @@ st.markdown(
     max-width: 1400px !important;
 }
 
-/* ===== MODERN GRADIENT BACKGROUND ===== */
 .stApp {
-    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%) !important;
+    background: var(--background) !important;
     font-family: 'Inter', 'Segoe UI', system-ui, sans-serif !important;
-    background-attachment: fixed !important;
 }
 
-/* ===== GLASS MORPHISM HEADER ===== */
-.glass-header {
-    background: rgba(255, 255, 255, 0.25) !important;
-    backdrop-filter: blur(20px) !important;
-    -webkit-backdrop-filter: blur(20px) !important;
-    padding: 2.5rem 3rem !important;
-    border-radius: 24px !important;
-    border: 1px solid rgba(255, 255, 255, 0.3) !important;
-    box-shadow: 0 15px 50px rgba(0, 0, 0, 0.1) !important;
+/* ===== PROFESSIONAL HEADER ===== */
+.professional-header {
+    background: linear-gradient(135deg, var(--primary) 0%, var(--primary-dark) 100%) !important;
+    padding: 2.5rem 2rem !important;
+    border-radius: 12px !important;
     margin-bottom: 2rem !important;
     text-align: center !important;
-    animation: fadeInUp 0.8s ease-out !important;
+    box-shadow: 0 4px 20px rgba(37, 99, 235, 0.15) !important;
+    border: 1px solid #e2e8f0 !important;
 }
 
 .main-title {
-    font-size: 3rem !important;
-    font-weight: 800 !important;
-    background: linear-gradient(45deg, #FF6B6B, #4ECDC4, #45B7D1, #96CEB4) !important;
-    background-size: 300% 300% !important;
-    -webkit-background-clip: text !important;
-    -webkit-text-fill-color: transparent !important;
-    animation: gradientShift 3s ease infinite !important;
+    font-size: 2.5rem !important;
+    font-weight: 700 !important;
+    color: white !important;
     margin: 0 !important;
-    text-shadow: 0 4px 8px rgba(0, 0, 0, 0.1) !important;
+    letter-spacing: -0.5px !important;
 }
 
 .sub-title {
     color: rgba(255, 255, 255, 0.9) !important;
-    font-size: 1.3rem !important;
+    font-size: 1.1rem !important;
     font-weight: 400 !important;
-    margin: 1rem 0 0 0 !important;
-    animation: fadeIn 1s ease-out 0.3s both !important;
+    margin: 0.8rem 0 0 0 !important;
 }
 
-/* ===== GLASS MORPHISM CARDS ===== */
-.glass-card {
-    background: rgba(255, 255, 255, 0.15) !important;
-    backdrop-filter: blur(15px) !important;
-    -webkit-backdrop-filter: blur(15px) !important;
-    padding: 2.5rem !important;
-    border-radius: 20px !important;
-    border: 1px solid rgba(255, 255, 255, 0.2) !important;
-    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1) !important;
-    margin-bottom: 2rem !important;
-    transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275) !important;
-    animation: slideInUp 0.6s ease-out !important;
+/* ===== PROFESSIONAL CARDS ===== */
+.pro-card {
+    background: var(--surface) !important;
+    padding: 2rem !important;
+    border-radius: 12px !important;
+    border: 1px solid #e2e8f0 !important;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06) !important;
+    margin-bottom: 1.5rem !important;
+    transition: all 0.3s ease !important;
 }
 
-.glass-card:hover {
-    transform: translateY(-8px) scale(1.01) !important;
-    box-shadow: 0 20px 60px rgba(0, 0, 0, 0.15) !important;
-    border-color: rgba(255, 255, 255, 0.4) !important;
+.pro-card:hover {
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1) !important;
+    border-color: #cbd5e1 !important;
 }
 
-/* ===== ANIMATED BUTTONS ===== */
+/* ===== PROFESSIONAL BUTTONS ===== */
 .stButton > button {
-    background: linear-gradient(135deg, #FF6B6B 0%, #4ECDC4 100%) !important;
+    background: var(--primary) !important;
     color: white !important;
     border: none !important;
-    border-radius: 15px !important;
-    padding: 1rem 2.5rem !important;
-    font-weight: 700 !important;
-    font-size: 1.1rem !important;
-    transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275) !important;
-    box-shadow: 0 8px 25px rgba(255, 107, 107, 0.3) !important;
+    border-radius: 8px !important;
+    padding: 0.75rem 2rem !important;
+    font-weight: 600 !important;
+    font-size: 1rem !important;
+    transition: all 0.2s ease !important;
     width: 100% !important;
-    position: relative !important;
-    overflow: hidden !important;
-}
-
-.stButton > button::before {
-    content: '' !important;
-    position: absolute !important;
-    top: 0 !important;
-    left: -100% !important;
-    width: 100% !important;
-    height: 100% !important;
-    background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.2), transparent) !important;
-    transition: left 0.5s !important;
-}
-
-.stButton > button:hover::before {
-    left: 100% !important;
 }
 
 .stButton > button:hover {
-    transform: translateY(-4px) scale(1.05) !important;
-    box-shadow: 0 15px 35px rgba(255, 107, 107, 0.4) !important;
-    background: linear-gradient(135deg, #FF8E8E 0%, #6BE8E1 100%) !important;
+    background: var(--primary-dark) !important;
+    transform: translateY(-1px) !important;
+    box-shadow: 0 4px 12px rgba(37, 99, 235, 0.3) !important;
 }
 
-/* ===== CLEAR VISIBLE TEXT AREAS ===== */
+/* ===== CLEAN INPUT FIELDS ===== */
 .stTextArea textarea {
-    background: rgba(255, 255, 255, 0.95) !important;
-    border-radius: 15px !important;
-    padding: 1.2rem !important;
-    border: 2px solid rgba(255, 255, 255, 0.3) !important;
-    font-size: 1rem !important;
-    line-height: 1.6 !important;
-    transition: all 0.3s ease !important;
-    color: #2D3748 !important;
-    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1) !important;
+    background: var(--surface) !important;
+    border-radius: 8px !important;
+    padding: 1rem !important;
+    border: 2px solid #e2e8f0 !important;
+    font-size: 0.95rem !important;
+    line-height: 1.5 !important;
+    transition: all 0.2s ease !important;
+    color: var(--text) !important;
+    font-family: 'Inter', sans-serif !important;
 }
 
 .stTextArea textarea:focus {
-    border-color: #4ECDC4 !important;
-    box-shadow: 0 0 0 3px rgba(78, 205, 196, 0.2) !important;
-    background: white !important;
-    transform: scale(1.02) !important;
+    border-color: var(--primary) !important;
+    box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.1) !important;
+    outline: none !important;
 }
 
 .stTextArea textarea::placeholder {
-    color: #718096 !important;
-    font-style: italic !important;
+    color: var(--text-light) !important;
 }
 
-/* ===== ANIMATED SKILL TAGS ===== */
+/* ===== PROFESSIONAL SKILL TAGS ===== */
 .skill-tag {
     display: inline-block !important;
-    margin: 0.4rem !important;
-    padding: 0.6rem 1.2rem !important;
-    border-radius: 25px !important;
-    background: linear-gradient(135deg, #FF6B6B 0%, #4ECDC4 100%) !important;
-    color: white !important;
-    font-weight: 700 !important;
-    font-size: 0.9rem !important;
-    box-shadow: 0 4px 15px rgba(255, 107, 107, 0.3) !important;
-    transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275) !important;
-    animation: popIn 0.5s ease-out !important;
-    cursor: pointer !important;
+    margin: 0.3rem !important;
+    padding: 0.5rem 1rem !important;
+    border-radius: 20px !important;
+    background: #f1f5f9 !important;
+    color: var(--text) !important;
+    font-weight: 500 !important;
+    font-size: 0.85rem !important;
+    border: 1px solid #e2e8f0 !important;
+    transition: all 0.2s ease !important;
 }
 
-.skill-tag:hover {
-    transform: scale(1.1) rotate(2deg) !important;
-    box-shadow: 0 6px 20px rgba(255, 107, 107, 0.4) !important;
+.skill-tag.strong {
+    background: #d1fae5 !important;
+    color: #065f46 !important;
+    border-color: #a7f3d0 !important;
 }
 
-/* ===== FLOATING STEP INDICATOR ===== */
+.skill-tag.improve {
+    background: #fef3c7 !important;
+    color: #92400e !important;
+    border-color: #fcd34d !important;
+}
+
+/* ===== FUNCTIONAL STEP INDICATOR ===== */
 .step-indicator {
     display: flex !important;
     justify-content: space-between !important;
     align-items: center !important;
-    margin: 3rem 0 !important;
+    margin: 2rem 0 !important;
     position: relative !important;
-    animation: fadeInUp 0.8s ease-out 0.2s both !important;
+    background: var(--surface) !important;
+    padding: 1.5rem !important;
+    border-radius: 12px !important;
+    border: 1px solid #e2e8f0 !important;
 }
 
 .step {
@@ -243,146 +218,104 @@ st.markdown(
 }
 
 .step-number {
-    width: 60px !important;
-    height: 60px !important;
+    width: 40px !important;
+    height: 40px !important;
     border-radius: 50% !important;
-    background: rgba(255, 255, 255, 0.2) !important;
-    color: white !important;
+    background: #f1f5f9 !important;
+    color: var(--text-light) !important;
     display: flex !important;
     align-items: center !important;
     justify-content: center !important;
-    font-weight: 800 !important;
-    margin-bottom: 0.8rem !important;
-    border: 3px solid rgba(255, 255, 255, 0.3) !important;
-    transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275) !important;
-    font-size: 1.2rem !important;
-    box-shadow: 0 8px 25px rgba(0, 0, 0, 0.15) !important;
+    font-weight: 600 !important;
+    margin-bottom: 0.5rem !important;
+    border: 2px solid #e2e8f0 !important;
+    transition: all 0.3s ease !important;
+    font-size: 0.9rem !important;
 }
 
 .step.active .step-number {
-    background: linear-gradient(135deg, #FF6B6B 0%, #4ECDC4 100%) !important;
-    transform: scale(1.2) !important;
-    box-shadow: 0 12px 35px rgba(255, 107, 107, 0.4) !important;
-    border-color: rgba(255, 255, 255, 0.5) !important;
-    animation: pulse 2s infinite !important;
+    background: var(--primary) !important;
+    color: white !important;
+    border-color: var(--primary) !important;
+    transform: scale(1.1) !important;
+}
+
+.step.completed .step-number {
+    background: var(--success) !important;
+    color: white !important;
+    border-color: var(--success) !important;
 }
 
 .step-line {
     position: absolute !important;
-    top: 30px !important;
+    top: 20px !important;
     left: 50% !important;
     right: -50% !important;
-    height: 4px !important;
-    background: rgba(255, 255, 255, 0.2) !important;
+    height: 2px !important;
+    background: #e2e8f0 !important;
     z-index: 1 !important;
-    transition: all 0.4s ease !important;
+    transition: all 0.3s ease !important;
 }
 
-.step.active .step-line {
-    background: linear-gradient(90deg, #FF6B6B, #4ECDC4) !important;
-    box-shadow: 0 2px 10px rgba(255, 107, 107, 0.3) !important;
+.step.completed .step-line {
+    background: var(--success) !important;
 }
 
 .step-label {
-    font-size: 1rem !important;
-    color: rgba(255, 255, 255, 0.9) !important;
-    font-weight: 600 !important;
+    font-size: 0.85rem !important;
+    color: var(--text-light) !important;
+    font-weight: 500 !important;
     text-align: center !important;
-    text-shadow: 0 2px 4px rgba(0, 0, 0, 0.2) !important;
     transition: all 0.3s ease !important;
 }
 
 .step.active .step-label {
-    color: white !important;
-    transform: scale(1.1) !important;
-    text-shadow: 0 4px 8px rgba(0, 0, 0, 0.3) !important;
+    color: var(--primary) !important;
+    font-weight: 600 !important;
 }
 
-/* ===== ANIMATED TAB STYLING ===== */
+.step.completed .step-label {
+    color: var(--success) !important;
+}
+
+/* ===== PROFESSIONAL TABS ===== */
 .stTabs [data-baseweb="tab-list"] {
-    gap: 1rem !important;
-    background-color: rgba(255, 255, 255, 0.1) !important;
-    padding: 0.8rem !important;
-    border-radius: 20px !important;
-    backdrop-filter: blur(10px) !important;
-    border: 1px solid rgba(255, 255, 255, 0.2) !important;
+    gap: 0.5rem !important;
+    background-color: var(--surface) !important;
+    padding: 0.5rem !important;
+    border-radius: 8px !important;
+    border: 1px solid #e2e8f0 !important;
 }
 
 .stTabs [data-baseweb="tab"] {
-    height: 60px !important;
+    height: 50px !important;
     background-color: transparent !important;
-    border-radius: 15px !important;
+    border-radius: 6px !important;
     padding: 0 1.5rem !important;
-    font-weight: 600 !important;
-    color: rgba(255, 255, 255, 0.8) !important;
-    transition: all 0.3s ease !important;
-    border: 2px solid transparent !important;
+    font-weight: 500 !important;
+    color: var(--text-light) !important;
+    transition: all 0.2s ease !important;
+    border: 1px solid transparent !important;
 }
 
 .stTabs [aria-selected="true"] {
-    background: linear-gradient(135deg, #FF6B6B 0%, #4ECDC4 100%) !important;
+    background: var(--primary) !important;
     color: white !important;
-    box-shadow: 0 8px 25px rgba(255, 107, 107, 0.3) !important;
-    transform: translateY(-2px) !important;
-    border-color: rgba(255, 255, 255, 0.3) !important;
+    border-color: var(--primary) !important;
 }
 
-/* ===== ANIMATED PROGRESS BAR ===== */
+/* ===== PROGRESS BAR ===== */
 .stProgress > div > div > div {
-    background: linear-gradient(90deg, #FF6B6B 0%, #4ECDC4 100%) !important;
-    border-radius: 10px !important;
-    animation: progressFill 2s ease-in-out !important;
+    background: linear-gradient(90deg, var(--primary) 0%, var(--primary-dark) 100%) !important;
+    border-radius: 4px !important;
 }
 
-/* ===== ANIMATIONS ===== */
-@keyframes fadeInUp {
-    from {
-        opacity: 0;
-        transform: translateY(30px);
-    }
-    to {
-        opacity: 1;
-        transform: translateY(0);
-    }
-}
-
-@keyframes fadeIn {
-    from { opacity: 0; }
-    to { opacity: 1; }
-}
-
-@keyframes slideInUp {
-    from {
-        opacity: 0;
-        transform: translateY(50px) scale(0.9);
-    }
-    to {
-        opacity: 1;
-        transform: translateY(0) scale(1);
-    }
-}
-
-@keyframes gradientShift {
-    0% { background-position: 0% 50%; }
-    50% { background-position: 100% 50%; }
-    100% { background-position: 0% 50%; }
-}
-
-@keyframes popIn {
-    0% { transform: scale(0); opacity: 0; }
-    70% { transform: scale(1.1); }
-    100% { transform: scale(1); opacity: 1; }
-}
-
-@keyframes pulse {
-    0% { box-shadow: 0 0 0 0 rgba(255, 107, 107, 0.4); }
-    70% { box-shadow: 0 0 0 15px rgba(255, 107, 107, 0); }
-    100% { box-shadow: 0 0 0 0 rgba(255, 107, 107, 0); }
-}
-
-@keyframes progressFill {
-    from { width: 0% !important; }
-    to { width: 100% !important; }
+/* ===== METRICS ===== */
+[data-testid="metric-container"] {
+    background: var(--surface) !important;
+    border: 1px solid #e2e8f0 !important;
+    border-radius: 8px !important;
+    padding: 1.5rem !important;
 }
 
 /* ===== MOBILE RESPONSIVENESS ===== */
@@ -391,9 +324,8 @@ st.markdown(
         padding: 0.5rem !important;
     }
     
-    .glass-header {
-        padding: 1.5rem 1rem !important;
-        border-radius: 20px !important;
+    .professional-header {
+        padding: 2rem 1rem !important;
     }
     
     .main-title {
@@ -404,50 +336,23 @@ st.markdown(
         font-size: 1rem !important;
     }
     
-    .glass-card {
+    .pro-card {
         padding: 1.5rem !important;
-        border-radius: 15px !important;
     }
     
     .step-indicator {
         flex-wrap: wrap !important;
         gap: 1rem !important;
-        margin: 2rem 0 !important;
+        margin: 1.5rem 0 !important;
     }
     
     .step {
         flex: 0 0 calc(50% - 1rem) !important;
-        margin-bottom: 1rem !important;
-    }
-    
-    .step-number {
-        width: 50px !important;
-        height: 50px !important;
-        font-size: 1rem !important;
+        margin-bottom: 0.5rem !important;
     }
     
     .step-line {
         display: none !important;
-    }
-    
-    .stButton > button {
-        padding: 0.8rem 1.5rem !important;
-        font-size: 1rem !important;
-    }
-    
-    .skill-tag {
-        font-size: 0.8rem !important;
-        padding: 0.5rem 1rem !important;
-    }
-}
-
-@media (max-width: 480px) {
-    .step {
-        flex: 0 0 100% !important;
-    }
-    
-    .main-title {
-        font-size: 1.6rem !important;
     }
 }
 
@@ -456,36 +361,29 @@ st.markdown(
 footer {visibility: hidden;}
 header {visibility: hidden;}
 
-/* ===== ANIMATED METRICS ===== */
-[data-testid="metric-container"] {
-    background: rgba(255, 255, 255, 0.15) !important;
-    backdrop-filter: blur(10px) !important;
-    border: 1px solid rgba(255, 255, 255, 0.2) !important;
-    border-radius: 15px !important;
-    padding: 1.5rem !important;
-    box-shadow: 0 8px 25px rgba(0, 0, 0, 0.1) !important;
-    transition: all 0.3s ease !important;
-    animation: slideInUp 0.6s ease-out !important;
+/* ===== STATUS MESSAGES ===== */
+.status-success {
+    background: #d1fae5 !important;
+    color: #065f46 !important;
+    border: 1px solid #a7f3d0 !important;
+    border-radius: 8px !important;
+    padding: 1rem !important;
 }
 
-[data-testid="metric-container"]:hover {
-    transform: translateY(-5px) !important;
-    box-shadow: 0 15px 35px rgba(0, 0, 0, 0.15) !important;
+.status-warning {
+    background: #fef3c7 !important;
+    color: #92400e !important;
+    border: 1px solid #fcd34d !important;
+    border-radius: 8px !important;
+    padding: 1rem !important;
 }
 
-/* ===== FLOATING ACTION BUTTON ===== */
-.floating-btn {
-    position: fixed !important;
-    bottom: 2rem !important;
-    right: 2rem !important;
-    z-index: 1000 !important;
-    animation: bounce 2s infinite !important;
-}
-
-@keyframes bounce {
-    0%, 20%, 50%, 80%, 100% {transform: translateY(0);}
-    40% {transform: translateY(-10px);}
-    60% {transform: translateY(-5px);}
+.status-error {
+    background: #fee2e2 !important;
+    color: #991b1b !important;
+    border: 1px solid #fca5a5 !important;
+    border-radius: 8px !important;
+    padding: 1rem !important;
 }
 </style>
 """,
@@ -493,7 +391,7 @@ header {visibility: hidden;}
 )
 
 # ----------------------------
-# REST OF YOUR FUNCTIONS (UNCHANGED)
+# CORE FUNCTIONS
 # ----------------------------
 def extract_skills_advanced(text):
     tech_skills = {
@@ -506,28 +404,36 @@ def extract_skills_advanced(text):
         'Mobile': ['react native', 'flutter', 'android', 'ios', 'swift', 'kotlin']
     }
     soft_skills = ['communication', 'teamwork', 'leadership', 'problem solving', 'creativity', 'adaptability', 'time management', 'critical thinking', 'collaboration', 'presentation']
+    
     found_skills = {category: [] for category in tech_skills}
     found_soft_skills = []
     text_lower = (text or "").lower()
+    
     for category, skills in tech_skills.items():
         for skill in skills:
             if skill in text_lower:
                 found_skills[category].append(skill.title())
+    
     for skill in soft_skills:
         if skill in text_lower:
             found_soft_skills.append(skill.title())
+    
     return found_skills, found_soft_skills
 
 def calculate_ai_match(resume_text, job_desc):
     if not (resume_text or "").strip() or not (job_desc or "").strip():
         return 0, {}, [], {}
+    
     vectorizer = CountVectorizer(stop_words='english', ngram_range=(1,3))
     tfidf_matrix = vectorizer.fit_transform([resume_text, job_desc])
     similarity = cosine_similarity(tfidf_matrix[0:1], tfidf_matrix[1:2])[0][0]
+    
     resume_tech, resume_soft = extract_skills_advanced(resume_text)
     job_tech, job_soft = extract_skills_advanced(job_desc)
+    
     total_tech_score = 0
     max_tech_score = 0
+    
     for category in job_tech:
         job_skills = job_tech[category]
         resume_skills = resume_tech[category]
@@ -535,8 +441,10 @@ def calculate_ai_match(resume_text, job_desc):
             max_tech_score += len(job_skills)
             matched = len(set(job_skills) & set(resume_skills))
             total_tech_score += matched
+    
     tech_match = (total_tech_score / max_tech_score * 100) if max_tech_score > 0 else 0
     soft_match = (len(set(job_soft) & set(resume_soft)) / len(job_soft) * 100) if job_soft else 0
+    
     final_score = (similarity * 40 + tech_match * 45 + soft_match * 15)
     return min(round(final_score * 100, 2), 100), resume_tech, resume_soft, job_tech, job_soft
 
@@ -545,6 +453,7 @@ def analyze_job_description(jd_text):
     lines = [l.strip() for l in jd.splitlines() if l.strip()]
     jd_lower = jd.lower()
     title = ""
+    
     m = re.search(r"job title[:\-]\s*(.+)", jd_lower)
     if m:
         title = m.group(1).strip().title()
@@ -553,11 +462,13 @@ def analyze_job_description(jd_text):
             first = lines[0]
             if len(first.split()) < 6:
                 title = first.title()
+    
     bullets = re.split(r"[\n•\-]+", jd)
     bullets = [b.strip() for b in bullets if len(b.strip()) > 2]
     job_tech, job_soft = extract_skills_advanced(jd)
+    
     return {
-        "title": title or "Unknown",
+        "title": title or "Not Specified",
         "bullets": bullets,
         "requirements": bullets[:6],
         "job_tech": job_tech,
@@ -578,18 +489,18 @@ def extract_text_from_pdf(file_bytes):
 
 def ai_improve_resume(resume_text, openai_api_key, target_role=None, max_tokens=700):
     if not openai:
-        return None, "openai package not installed. Install with `pip install openai`"
+        return None, "OpenAI package not installed"
     if not openai_api_key:
-        return None, "No OpenAI API key provided. Set it in sidebar or set OPENAI_API_KEY env var."
+        return None, "No OpenAI API key provided"
+    
     try:
         openai.api_key = openai_api_key
-        prompt = f"""You are a professional resume editor. Improve the following resume content to be concise, professional, action-oriented, and tailored for {target_role or 'the target job'}.
-Keep bullet points, improve verbs, fix grammar, and suggest a short 2-line summary at top.
-
-Resume:
+        prompt = f"""Improve this resume for {target_role or 'a professional role'}:
+        
 {resume_text}
 
-Provide output only in plain text with improved resume content."""
+Provide only the improved resume content:"""
+        
         resp = openai.ChatCompletion.create(
             model="gpt-4o-mini",
             messages=[{"role":"user","content":prompt}],
@@ -601,97 +512,101 @@ Provide output only in plain text with improved resume content."""
     except Exception as e:
         return None, f"OpenAI request failed: {e}"
 
-def generate_report_pdf(match_score, resume_text, job_desc, strong_points, improvement_points, job_title=""):
-    pdf = FPDF()
-    pdf.set_auto_page_break(auto=True, margin=15)
-    pdf.add_page()
-    pdf.set_font("Helvetica", "B", 16)
-    pdf.cell(0, 8, "AI Resume Matcher Report", ln=True, align="C")
-    pdf.ln(4)
-    pdf.set_font("Helvetica", size=11)
-    pdf.cell(0, 6, f"Job Title: {job_title}", ln=True)
-    pdf.cell(0, 6, f"Match Score: {match_score}%", ln=True)
-    pdf.ln(6)
-    pdf.set_font("Helvetica", "B", 12)
-    pdf.cell(0, 6, "Strong Points:", ln=True)
-    pdf.set_font("Helvetica", size=11)
-    if strong_points:
-        for s in strong_points:
-            pdf.multi_cell(0, 6, f"- {s}")
-    else:
-        pdf.multi_cell(0,6, "- None detected")
-    pdf.ln(4)
-    pdf.set_font("Helvetica", "B", 12)
-    pdf.cell(0, 6, "Improvement Areas:", ln=True)
-    pdf.set_font("Helvetica", size=11)
-    if improvement_points:
-        for s in improvement_points:
-            pdf.multi_cell(0, 6, f"- {s}")
-    else:
-        pdf.multi_cell(0,6, "- None detected")
-    pdf.ln(6)
-    pdf.set_font("Helvetica", "B", 12)
-    pdf.cell(0,6, "Extracts from Resume:", ln=True)
-    pdf.set_font("Helvetica", size=10)
-    sample_resume = (resume_text or "")[:1500]
-    pdf.multi_cell(0,5, sample_resume)
-    pdf.ln(6)
-    pdf.set_font("Helvetica", "B", 12)
-    pdf.cell(0,6,"Job Description Extract:", ln=True)
-    pdf.set_font("Helvetica", size=10)
-    pdf.multi_cell(0,5, (job_desc or "")[:1500])
-    out = pdf.output(dest="S").encode("latin-1")
-    return out
+def generate_text_report(match_score, strong_points, improvement_points, job_title=""):
+    """Generate a simple text report instead of PDF to avoid encoding issues"""
+    report = f"""
+RESUME MATCH ANALYSIS REPORT
+============================
+
+Job Title: {job_title}
+Match Score: {match_score}%
+
+STRONG POINTS:
+{chr(10).join(f"• {point}" for point in strong_points) if strong_points else "• No strong points identified"}
+
+IMPROVEMENT AREAS:
+{chr(10).join(f"• {point}" for point in improvement_points) if improvement_points else "• No major improvement areas"}
+
+RECOMMENDATIONS:
+• Focus on developing the skills mentioned above
+• Tailor your resume to highlight matching skills
+• Consider relevant projects or certifications
+
+Generated by ResumeMatch Pro
+    """
+    return report
 
 # ----------------------------
-# ULTRA ATTRACTIVE UI BUILDING
+# STEP MANAGEMENT
+# ----------------------------
+def update_step_progress():
+    """Update step progress based on user actions"""
+    has_resume = bool(st.session_state.get("resume_text", "").strip())
+    has_job_desc = bool(st.session_state.get("job_desc_input", "").strip())
+    analysis_done = st.session_state.get("analysis_complete", False)
+    
+    if analysis_done:
+        st.session_state.current_step = 4
+    elif has_resume and has_job_desc:
+        st.session_state.current_step = 3
+    elif has_resume:
+        st.session_state.current_step = 2
+    else:
+        st.session_state.current_step = 1
+
+# ----------------------------
+# PROFESSIONAL UI BUILDING
 # ----------------------------
 
-# ANIMATED GLASS HEADER
+# Professional Header
 html(f"""
-<div class="glass-header">
-    <div class="main-title">🚀 ResumeMatch AI</div>
-    <div class="sub-title">Smart Resume Analysis • AI-Powered Matching • Professional Reports</div>
+<div class="professional-header">
+    <div class="main-title">ResumeMatch Pro</div>
+    <div class="sub-title">AI-Powered Resume Analysis • Professional Matching • Career Insights</div>
 </div>
 """)
 
-# FLOATING STEP INDICATOR
-html("""
+# Update step progress
+update_step_progress()
+
+# Dynamic Step Indicator
+current_step = st.session_state.current_step
+html(f"""
 <div class="step-indicator">
-    <div class="step active">
+    <div class="step {'completed' if current_step >= 1 else 'active' if current_step == 1 else ''}">
         <div class="step-number">1</div>
         <div class="step-line"></div>
         <div class="step-label">Upload Resume</div>
     </div>
-    <div class="step">
+    <div class="step {'completed' if current_step >= 2 else 'active' if current_step == 2 else ''}">
         <div class="step-number">2</div>
         <div class="step-line"></div>
         <div class="step-label">Add Job Details</div>
     </div>
-    <div class="step">
+    <div class="step {'completed' if current_step >= 3 else 'active' if current_step == 3 else ''}">
         <div class="step-number">3</div>
         <div class="step-line"></div>
         <div class="step-label">Get Analysis</div>
     </div>
-    <div class="step">
+    <div class="step {'completed' if current_step >= 4 else 'active' if current_step == 4 else ''}">
         <div class="step-number">4</div>
         <div class="step-line"></div>
-        <div class="step-label">Download Report</div>
+        <div class="step-label">View Results</div>
     </div>
 </div>
 """)
 
-# Enhanced Sidebar with Glass Effect
+# Professional Sidebar
 with st.sidebar:
-    html('<div class="glass-card">')
-    st.header("⚙️ Settings & Tools")
+    html('<div class="pro-card">')
+    st.header("Settings & Tools")
     
     st.subheader("AI Features")
     openai_api_key = st.text_input(
         "OpenAI API Key", 
         type="password",
-        placeholder="sk-...",
-        help="Optional: For AI resume improvements"
+        placeholder="Enter your API key...",
+        help="Required for AI resume improvements"
     )
     
     use_ai_rewrite = st.checkbox(
@@ -701,148 +616,126 @@ with st.sidebar:
     )
     
     if use_ai_rewrite and not openai_api_key:
-        st.warning("🔑 Please add your OpenAI API key to enable AI features")
+        st.warning("Please add your OpenAI API key to enable AI features")
     
     st.markdown("---")
-    st.subheader("Quick Tips")
+    st.subheader("Quick Guide")
     st.info("""
-    💡 **Pro Tips:**
-    - Upload PDF resumes for quick analysis
-    - Use AI rewrite for professional improvements  
-    - Download PDF reports for interviews
-    - Analyze job descriptions before applying
+    **How to use:**
+    1. Upload or paste your resume
+    2. Add the job description
+    3. Click Analyze to get insights
+    4. Review matches and improvements
     """)
     html('</div>')
 
-# Initialize session state
-if "resume_text" not in st.session_state:
-    st.session_state["resume_text"] = ""
-if "job_desc_input" not in st.session_state:
-    st.session_state["job_desc_input"] = ""
-if "current_step" not in st.session_state:
-    st.session_state["current_step"] = 1
-
-# Main Content Area with Animated Tabs
-tab1, tab2, tab3 = st.tabs(["📝 Resume Input", "💼 Job Analysis", "📊 Match Results"])
+# Main Content Area with Professional Tabs
+tab1, tab2, tab3 = st.tabs(["📝 Resume", "💼 Job Description", "📊 Analysis"])
 
 with tab1:
-    html('<div class="glass-card">')
+    html('<div class="pro-card">')
+    st.subheader("Resume Input")
     
-    # Header with animation
-    col_header = st.columns([3, 1])
-    with col_header[0]:
-        st.subheader("📄 Your Resume Content")
-    with col_header[1]:
-        if lottie_upload:
-            st_lottie(lottie_upload, height=80, key="upload_anim")
+    # File upload section
+    upload_col1, upload_col2 = st.columns([2, 1])
+    with upload_col1:
+        upload_mode = st.radio(
+            "Select input method:",
+            ["Paste Text", "Upload PDF"],
+            horizontal=True
+        )
     
-    # File upload section with better styling
-    st.markdown("### 📥 Choose Input Method")
-    upload_mode = st.radio(
-        "",
-        ["📋 Paste Text", "📁 Upload PDF"],
-        horizontal=True,
-        label_visibility="collapsed"
-    )
-    
-    if upload_mode == "📁 Upload PDF":
+    if upload_mode == "Upload PDF":
         uploaded_file = st.file_uploader(
-            "Drag & drop or click to upload your resume PDF",
+            "Upload your resume PDF",
             type=["pdf"],
-            help="Supported: PDF files up to 10MB"
+            help="Supported: PDF files"
         )
         if uploaded_file:
             if PdfReader is None:
-                st.error("📚 PyPDF2 required: Run `pip install PyPDF2`")
+                st.error("PyPDF2 required: Install with `pip install PyPDF2`")
             else:
-                with st.spinner("📖 Reading your PDF..."):
+                with st.spinner("Extracting text from PDF..."):
                     txt, err = extract_text_from_pdf(uploaded_file)
                     if err:
-                        st.error(f"❌ {err}")
+                        st.error(f"Error: {err}")
                     else:
                         st.session_state["resume_text"] = txt
-                        st.success("✅ PDF extracted successfully!")
-                        with st.expander("👀 Preview extracted text", expanded=True):
+                        st.success("PDF extracted successfully!")
+                        with st.expander("Preview extracted text"):
                             st.text_area(
                                 "Extracted Content", 
-                                value=st.session_state["resume_text"][:1000] + "..." if len(st.session_state["resume_text"]) > 1000 else st.session_state["resume_text"],
-                                height=200,
+                                value=st.session_state["resume_text"][:800] + "..." if len(st.session_state["resume_text"]) > 800 else st.session_state["resume_text"],
+                                height=150,
                                 key="preview_area"
                             )
     
-    # Text area for resume - NOW PERFECTLY VISIBLE
-    st.markdown("### ✍️ Your Resume Content")
-    st.session_state["resume_text"] = st.text_area(
-        "Paste or edit your resume content below:",
+    # Text area for resume
+    st.text_area(
+        "Paste your resume content:",
         height=300,
         value=st.session_state["resume_text"],
         placeholder="""EXPERIENCE:
-• 2 years as Full Stack Developer at Tech Corp
+• 2 years as Full Stack Developer
 • Built web applications using React & Node.js
-• Implemented machine learning models with Python
+• Implemented machine learning models
 
 SKILLS:
 • Programming: Python, JavaScript, Java
 • Frameworks: React, Node.js, Django
-• Databases: MySQL, MongoDB, PostgreSQL
+• Databases: MySQL, MongoDB
 • Tools: Git, Docker, AWS
 
 EDUCATION:
-• B.Tech in Computer Science - 8.5 CGPA""",
+• B.Tech in Computer Science""",
         key="resume_area",
-        label_visibility="collapsed"
+        on_change=lambda: update_step_progress()
     )
     
-    # Character count with animation
+    # Character count
     if st.session_state["resume_text"]:
         char_count = len(st.session_state["resume_text"])
         word_count = len(st.session_state["resume_text"].split())
-        col_stats = st.columns(3)
-        with col_stats[0]:
-            st.metric("📝 Characters", char_count)
-        with col_stats[1]:
-            st.metric("📊 Words", word_count)
-        with col_stats[2]:
-            st.metric("📄 Pages", f"{(char_count / 1500):.1f}")
+        st.caption(f"📝 {char_count} characters, {word_count} words")
     
     html('</div>')
     
     # AI Improvement Section
     if use_ai_rewrite:
-        html('<div class="glass-card">')
-        st.subheader("🤖 AI Resume Improver")
+        html('<div class="pro-card">')
+        st.subheader("AI Resume Improver")
         
         target_role = st.text_input(
-            "🎯 Target role (optional):",
-            placeholder="e.g., Full Stack Developer, Data Scientist",
-            help="AI will tailor improvements for this specific role"
+            "Target role (optional):",
+            placeholder="e.g., Full Stack Developer",
+            help="AI will tailor improvements for this role"
         )
         
-        if st.button("✨ Improve with AI", use_container_width=True):
+        if st.button("Improve with AI", use_container_width=True):
             if not st.session_state["resume_text"]:
                 st.error("Please add resume content first")
             elif not openai_api_key:
                 st.error("OpenAI API key required")
             else:
-                with st.spinner("🪄 AI is enhancing your resume..."):
+                with st.spinner("AI is enhancing your resume..."):
                     improved, err = ai_improve_resume(
                         st.session_state["resume_text"], 
                         openai_api_key, 
                         target_role=target_role
                     )
                     if err:
-                        st.error(f"❌ {err}")
+                        st.error(f"Error: {err}")
                     else:
                         st.session_state["resume_text"] = improved
-                        st.success("✅ Resume improved! Review and edit below")
+                        st.success("Resume improved! Review below")
         html('</div>')
 
 with tab2:
-    html('<div class="glass-card">')
-    st.subheader("💼 Job Description Analysis")
+    html('<div class="pro-card">')
+    st.subheader("Job Description Analysis")
     
-    st.session_state["job_desc_input"] = st.text_area(
-        "📋 Paste the job description:",
+    st.text_area(
+        "Paste the job description:",
         height=300,
         value=st.session_state["job_desc_input"],
         placeholder="""JOB TITLE: Full Stack Developer
@@ -852,132 +745,102 @@ REQUIREMENTS:
 • Strong proficiency in JavaScript, Python
 • Experience with React.js and Node.js
 • Knowledge of databases (SQL & NoSQL)
-• Familiarity with cloud platforms (AWS)
-• Understanding of CI/CD pipelines
-
-NICE TO HAVE:
-• Machine learning experience
-• Mobile development (React Native)
-• DevOps practices
+• Familiarity with cloud platforms
 
 SOFT SKILLS:
 • Excellent communication skills
 • Team player mentality
 • Problem-solving attitude""",
-        key="job_area"
+        key="job_area",
+        on_change=lambda: update_step_progress()
     )
     
     if st.session_state["job_desc_input"]:
         char_count = len(st.session_state["job_desc_input"])
         word_count = len(st.session_state["job_desc_input"].split())
-        st.caption(f"📊 {char_count} characters, {word_count} words")
+        st.caption(f"📋 {char_count} characters, {word_count} words")
     
     # JD Analysis
-    if st.button("🔍 Analyze Job Description", use_container_width=True):
+    if st.button("Analyze Job Description", use_container_width=True):
         if not st.session_state["job_desc_input"]:
             st.error("Please add a job description first")
         else:
-            with st.spinner("Analyzing job requirements..."):
+            with st.spinner("Analyzing requirements..."):
                 jd_struct = analyze_job_description(st.session_state["job_desc_input"])
                 
-                col_a, col_b = st.columns(2)
+                col1, col2 = st.columns(2)
                 
-                with col_a:
-                    st.metric("📝 Detected Job Title", jd_struct["title"])
-                    st.metric("📋 Key Requirements", len(jd_struct["requirements"]))
+                with col1:
+                    st.metric("Detected Job Title", jd_struct["title"])
+                    st.metric("Key Requirements", len(jd_struct["requirements"]))
                 
-                with col_b:
+                with col2:
                     tech_skills_count = sum(len(skills) for skills in jd_struct["job_tech"].values())
-                    st.metric("🛠️ Technical Skills", tech_skills_count)
-                    st.metric("💬 Soft Skills", len(jd_struct["job_soft"]))
+                    st.metric("Technical Skills", tech_skills_count)
+                    st.metric("Soft Skills", len(jd_struct["job_soft"]))
                 
                 # Skills breakdown
-                with st.expander("🔧 Technical Skills Breakdown", expanded=True):
+                with st.expander("Technical Skills Breakdown"):
                     for cat, skills in jd_struct["job_tech"].items():
                         if skills:
                             st.write(f"**{cat}:**")
-                            cols = st.columns(3)
-                            for i, skill in enumerate(skills):
-                                cols[i % 3].markdown(f"<span class='skill-tag'>{skill}</span>", unsafe_allow_html=True)
-                
-                if jd_struct["job_soft"]:
-                    with st.expander("💬 Soft Skills Required", expanded=True):
-                        cols = st.columns(3)
-                        for i, skill in enumerate(jd_struct["job_soft"]):
-                            cols[i % 3].markdown(f"<span class='skill-tag'>{skill}</span>", unsafe_allow_html=True)
+                            for skill in skills[:5]:  # Limit to 5 skills per category
+                                st.markdown(f'<span class="skill-tag">{skill}</span>', unsafe_allow_html=True)
     
     html('</div>')
 
 with tab3:
-    html('<div class="glass-card">')
-    st.subheader("🚀 Ready to Analyze!")
+    html('<div class="pro-card">')
+    st.subheader("Resume Match Analysis")
     
-    st.info("""
-    **Next Steps:**
-    1. ✅ Add your resume in the first tab
-    2. ✅ Add job description in the second tab  
-    3. 🎯 Click the button below to get your match analysis
-    4. 📥 Download your personalized report
-    """)
+    if not st.session_state["resume_text"] or not st.session_state["job_desc_input"]:
+        st.warning("Please add both resume content and job description to proceed with analysis.")
+    else:
+        st.success("Ready for analysis! Click the button below to see how your resume matches the job requirements.")
     
-    # Central analyze button with animation
-    col_center = st.columns([1, 2, 1])
-    with col_center[1]:
-        analyze_btn = st.button("🎯 Analyze Resume Match", use_container_width=True, type="primary")
-    
-    if analyze_btn:
+    # Central analyze button
+    if st.button("Analyze Resume Match", type="primary", use_container_width=True):
         resume_text = st.session_state.get("resume_text", "")
         job_desc_input = st.session_state.get("job_desc_input", "")
         
         if not resume_text.strip():
-            st.error("❌ Please provide your resume content")
+            st.error("Please provide your resume content")
         elif not job_desc_input.strip():
-            st.error("❌ Please provide a job description")
+            st.error("Please provide a job description")
         else:
-            with st.spinner("🔍 Analyzing your match..."):
+            with st.spinner("Analyzing your resume match..."):
                 time.sleep(1)
                 score, rtech, rsoft, jtech, jsoft = calculate_ai_match(resume_text, job_desc_input)
+                st.session_state.analysis_complete = True
+                st.session_state.current_step = 4
                 
                 # Display Results
                 st.markdown("---")
                 
                 # Score Card
-                html('<div class="glass-card">')
-                col_score1, col_score2, col_score3 = st.columns([1, 2, 1])
+                html('<div class="pro-card">')
+                if score >= 80:
+                    st.success(f"**EXCELLENT MATCH - {score}%**")
+                    st.info("Your resume strongly aligns with this job requirement!")
+                elif score >= 60:
+                    st.warning(f"**GOOD MATCH - {score}%**")
+                    st.info("Good foundation with some areas for improvement.")
+                else:
+                    st.error(f"**NEEDS IMPROVEMENT - {score}%**")
+                    st.info("Focus on developing the missing skills below.")
                 
-                with col_score2:
-                    if score >= 80:
-                        st.success(f"🎉 EXCELLENT MATCH - {score}%")
-                        if st_lottie and lottie_success:
-                            try:
-                                st_lottie(lottie_success, height=120)
-                            except:
-                                pass
-                    elif score >= 60:
-                        st.warning(f"👍 GOOD MATCH - {score}%")
-                    else:
-                        st.error(f"💡 NEEDS IMPROVEMENT - {score}%")
-                    
-                    st.progress(score / 100)
-                    
-                    # Match interpretation
-                    if score >= 80:
-                        st.info("**🎯 Your resume strongly aligns with this job!**")
-                    elif score >= 60:
-                        st.info("**📈 Good foundation - consider some improvements**")
-                    else:
-                        st.info("**🛠️ Focus on developing missing skills**")
-                
+                st.progress(score / 100)
                 html('</div>')
                 
                 # Skills Analysis
-                col_skills1, col_skills2 = st.columns(2)
+                col_left, col_right = st.columns(2)
                 strong_list, missing_list = [], []
                 
-                with col_skills1:
-                    html('<div class="glass-card">')
+                with col_left:
+                    html('<div class="pro-card">')
                     st.subheader("✅ Your Strong Points")
                     any_strong = False
+                    
                     for cat in rtech:
                         matched = set(rtech[cat]) & set(jtech[cat])
                         if matched:
@@ -985,107 +848,78 @@ with tab3:
                             st.write(f"**{cat}**")
                             for s in matched:
                                 strong_list.append(f"{cat}: {s}")
-                                st.markdown(f"<span class='skill-tag'>🎯 {s}</span>", unsafe_allow_html=True)
+                                st.markdown(f'<span class="skill-tag strong">✓ {s}</span>', unsafe_allow_html=True)
+                    
                     matched_soft = set(rsoft) & set(jsoft)
                     if matched_soft:
                         any_strong = True
                         st.write("**Soft Skills**")
                         for s in matched_soft:
                             strong_list.append(f"Soft: {s}")
-                            st.markdown(f"<span class='skill-tag'>💬 {s}</span>", unsafe_allow_html=True)
+                            st.markdown(f'<span class="skill-tag strong">✓ {s}</span>', unsafe_allow_html=True)
+                    
                     if not any_strong:
                         st.info("No strong matching points detected.")
                     html('</div>')
                 
-                with col_skills2:
-                    html('<div class="glass-card">')
+                with col_right:
+                    html('<div class="pro-card">')
                     st.subheader("📚 Improvement Areas")
                     any_missing = False
+                    
                     for cat in jtech:
                         missing = set(jtech[cat]) - set(rtech[cat])
                         if missing:
                             any_missing = True
                             st.write(f"**{cat}**")
-                            for s in list(missing)[:4]:
+                            for s in list(missing)[:3]:
                                 missing_list.append(f"{cat}: {s}")
-                                st.markdown(f"<span class='skill-tag' style='background: linear-gradient(135deg, #ef4444, #dc2626);'>📘 {s}</span>", unsafe_allow_html=True)
+                                st.markdown(f'<span class="skill-tag improve">+ {s}</span>', unsafe_allow_html=True)
+                    
                     missing_soft = set(jsoft) - set(rsoft)
                     if missing_soft:
                         any_missing = True
                         st.write("**Soft Skills**")
-                        for s in list(missing_soft)[:3]:
+                        for s in list(missing_soft)[:2]:
                             missing_list.append(f"Soft: {s}")
-                            st.markdown(f"<span class='skill-tag' style='background: linear-gradient(135deg, #ef4444, #dc2626);'>💬 {s}</span>", unsafe_allow_html=True)
+                            st.markdown(f'<span class="skill-tag improve">+ {s}</span>', unsafe_allow_html=True)
+                    
                     if not any_missing:
-                        st.success("🎉 No major skill gaps found!")
+                        st.success("Excellent! No major skill gaps found.")
                     html('</div>')
                 
-                # Visualization
-                try:
-                    import plotly.graph_objects as go
-                    cats = list(rtech.keys())
-                    resume_counts = [len(rtech[c]) for c in cats]
-                    job_counts = [len(jtech[c]) for c in cats]
-                    
-                    fig = go.Figure()
-                    fig.add_trace(go.Bar(
-                        name="Your Skills", 
-                        x=cats, 
-                        y=resume_counts,
-                        marker_color='#4ECDC4'
-                    ))
-                    fig.add_trace(go.Bar(
-                        name="Required Skills", 
-                        x=cats, 
-                        y=job_counts,
-                        marker_color='#FF6B6B'
-                    ))
-                    fig.update_layout(
-                        title="Skill Distribution Comparison",
-                        plot_bgcolor='rgba(0,0,0,0)',
-                        paper_bgcolor='rgba(0,0,0,0)',
-                        height=400
-                    )
-                    st.plotly_chart(fig, use_container_width=True)
-                except Exception:
-                    pass
+                # Generate and Download Report
+                html('<div class="pro-card">')
+                st.subheader("Download Report")
                 
-                # Download Report
-                html('<div class="glass-card">')
-                st.subheader("📥 Download Your Report")
+                jd_title = analyze_job_description(job_desc_input)['title']
+                report_text = generate_text_report(score, strong_list, missing_list, job_title=jd_title)
                 
-                jd_title = analyze_job_description(job_desc_input)['title'] if job_desc_input else ""
-                report_bytes = generate_report_pdf(
-                    score, resume_text, job_desc_input, 
-                    strong_list, missing_list, job_title=jd_title
-                )
-                
+                # Create download button for text report
                 st.download_button(
-                    "💾 Download Comprehensive Report (PDF)",
-                    data=report_bytes,
-                    file_name=f"resume_match_report_{jd_title.replace(' ', '_')}.pdf",
-                    mime="application/pdf",
+                    "📄 Download Analysis Report",
+                    data=report_text,
+                    file_name=f"resume_analysis_report.txt",
+                    mime="text/plain",
                     use_container_width=True
                 )
                 html('</div>')
     
     html('</div>')
 
-# Animated Footer
+# Professional Footer
 html("""
 <div style='
     text-align:center; 
-    color:rgba(255,255,255,0.9); 
+    color:#64748b; 
     margin-top:3rem; 
-    padding:2.5rem; 
-    background:rgba(255,255,255,0.1);
-    backdrop-filter:blur(10px);
-    border-radius:20px;
-    border:1px solid rgba(255,255,255,0.2);
-    animation:fadeInUp 0.8s ease-out;
+    padding:2rem; 
+    background:white;
+    border-radius:12px;
+    border:1px solid #e2e8f0;
 '>
-    <div style='font-weight:800; margin-bottom:0.8rem; font-size:1.3rem;'>🚀 ResumeMatch AI</div>
-    <div style='font-size:1rem; margin-bottom:0.5rem;'>AI-Powered Resume Analysis • Professional Matching • Career Optimization</div>
-    <div style='font-size:0.9rem; color:rgba(255,255,255,0.7);'>Built with ❤️ using Streamlit</div>
+    <div style='font-weight:600; margin-bottom:0.5rem; font-size:1.1rem;'>ResumeMatch Pro</div>
+    <div style='font-size:0.95rem; margin-bottom:0.5rem;'>Professional Resume Analysis Tool</div>
+    <div style='font-size:0.85rem; color:#94a3b8;'>Built for Career Success</div>
 </div>
 """)
