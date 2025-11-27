@@ -11,6 +11,10 @@ An intelligent resume analysis tool that matches your skills with job descriptio
 - 📈 **Visual Skill Comparisons**
 - 📥 **Professional PDF Reports**
 
+## 🎬 Live Demo
+
+👉 Try it here: **https://resume-analyzer-cqmlkm75fvvltnadxaaj9u.streamlit.app/**
+
 ## 🛠️ Tech Stack
 
 - **Frontend:** Streamlit
@@ -24,6 +28,4 @@ An intelligent resume analysis tool that matches your skills with job descriptio
 1. **Install dependencies:**
 ```bash
 pip install -r requirements.txt
-
-## 🎬 Live Demo:
-    link- https://resume-analyzer-cqmlkm75fvvltnadxaaj9u.streamlit.app/
+```
