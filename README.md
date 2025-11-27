@@ -24,3 +24,6 @@ An intelligent resume analysis tool that matches your skills with job descriptio
 1. **Install dependencies:**
 ```bash
 pip install -r requirements.txt
+
+**Live Demo**
+link- https://resume-analyzer-cqmlkm75fvvltnadxaaj9u.streamlit.app/
